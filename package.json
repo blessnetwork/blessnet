@@ -1,0 +1,28 @@
+{
+  "name": "blessnet",
+  "version": "1.0.9",
+  "description": "The CLI tool for interacting with blessnet",
+  "main": "index.js",
+  "bin": {
+    "blessnet": "./index.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@blockless/sdk-ts": "^1.0.2",
+    "@iarna/toml": "^2.2.5",
+    "@solana/web3.js": "1.98.0",
+    "chalk": "^4.0.0",
+    "cli-box": "^6.0.10",
+    "commander": "12.1.0",
+    "express": "^4.21.2",
+    "follow-redirects": "^1.15.9",
+    "ora": "^7.0.0",
+    "readline-sync": "^1.4.10",
+    "simple-git": "^3.27.0",
+    "unique-names-generator": "^4.7.1"
+  }
+}
