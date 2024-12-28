@@ -57,9 +57,12 @@ async function main() {
     const blsTomlPath = path.join(cwd, 'bls.toml');
     const isInitCommand = process.argv.includes('init');
     const isHelpCommand = process.argv.includes('help');
+    const isPreviewCommand = process.argv.includes('preview');
+    const isManageCommand = process.argv.includes('manage');
+    const isDeployCommand = process.argv.includes('deploy');
 
     if (fs.existsSync(blsTomlPath)) {
-        if (!isHelpCommand) {
+        if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
             const blsToml = parseTomlConfig(cwd, 'bls.toml'); // Use parseTomlConfig
 
             const info = [{
