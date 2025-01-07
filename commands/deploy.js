@@ -4,18 +4,22 @@ const { createWasmArchive } = require('../lib/archive');
 const fs = require('node:fs');
 const path = require('node:path');
 const { execSync } = require('node:child_process');
-const crypto = require('crypto');
+const crypto = require('node:crypto');
+const { parseBlsConfig } = require('../lib/config');
 
 const deployCommand = new Command('deploy')
     .description('Deploy your project')
     .action(() => {
         console.log('Deploy command executed');
 
+        // Load configuration
+        const config = parseBlsConfig(process.cwd());
+
         // Check if release build exists
-        const releasePath = path.join(__dirname, '../foo/build/release.wasm');
+        const releasePath = path.join(process.cwd(), config.build_release.dir, "release.wasm");
         if (!fs.existsSync(releasePath)) {
             console.log('Release build not found. Building release.wasm...');
-            execSync('npm run build:release', { stdio: 'inherit' });
+            execSync(config.build_release.command, { stdio: 'inherit' });
         }
 
         // Rename release.wasm to the package.json name
