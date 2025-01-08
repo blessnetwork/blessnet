@@ -73,7 +73,16 @@ async function main() {
 
             console.table(info);
 
-            console.log(chalk.yellow("Deployment Status: Not Deployed\n"));
+            if (blsToml.deployments && blsToml.deployments.length > 0) {
+                const deployment = blsToml.deployments[0];
+                const createdDate = new Date(deployment.created).toLocaleString();
+                console.log(chalk.yellow(`Deployment Status: ${chalk.green("Deployed")}`));
+                console.log(chalk.yellow(`CID: ${deployment.cid}`));
+                console.log(`${chalk.yellow("Created:")}  ${createdDate}\n`);
+            } else {
+                console.log(chalk.yellow("Deployment Status: Not Deployed\n"));
+            }
+
             console.log("Deploy this project to the BLESS network using the command:");
             console.log(chalk.green("blessnet deploy\n"));
 
