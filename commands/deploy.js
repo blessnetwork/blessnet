@@ -8,10 +8,16 @@ const crypto = require('node:crypto');
 const { parseBlsConfig } = require('../lib/config');
 const toml = require('@iarna/toml');
 
+const getOra = async () => {
+    const { default: ora } = await import('ora');
+    return ora;
+};
+
 const deployCommand = new Command('deploy')
     .description('Deploy your project')
     .action(async () => {
-        console.log('Deploy command executed');
+        const ora = await getOra();
+        const deploySpinner = ora('Deploying project ...').start()
 
         // Load configuration
         const config = parseBlsConfig(process.cwd());
@@ -19,7 +25,7 @@ const deployCommand = new Command('deploy')
         // Check if release build exists
         const releasePath = path.join(process.cwd(), config.build_release.dir, "release.wasm");
         if (!fs.existsSync(releasePath)) {
-            console.log('Release build not found. Building release.wasm...');
+            deploySpinner.text = "Building release ...";
             execSync(config.build_release.command, { stdio: 'inherit' });
         }
 
@@ -28,20 +34,18 @@ const deployCommand = new Command('deploy')
         const wasmName = `${packageJson.name}.wasm`;
         const renamedWasmPath = path.join(process.cwd(), config.build_release.dir, wasmName);
         fs.renameSync(releasePath, renamedWasmPath);
-        console.log(`Renamed release.wasm to ${wasmName}`);
 
         // Generate manifest.json
         const manifest = createWasmManifest(wasmName, 'application/javascript');
         const manifestPath = path.join(process.cwd(), config.build_release.dir, 'manifest.json');
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-        console.log(`Manifest generated at ${manifestPath}`);
 
         // Create archive of manifest.json and the renamed wasm file
         const archiveName = `${packageJson.name}.tar.gz`;
         const archivePath = path.join(process.cwd(), config.build_release.dir, archiveName);
         const archiveBuffer = await createWasmArchive(path.join(process.cwd(), config.build_release.dir), archiveName, wasmName);
-        console.log(`Archive created at ${archivePath}`);
 
+        deploySpinner.text = 'Publishing Archive Created ...'
         // Update manifest with new values
         const wasmMd5 = crypto.createHash('md5').update(fs.readFileSync(renamedWasmPath)).digest('hex');
         const archiveChecksum = crypto.createHash('sha256').update(fs.readFileSync(archivePath)).digest('hex');
@@ -56,7 +60,6 @@ const deployCommand = new Command('deploy')
             checksum: archiveChecksum
         };
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
-        console.log(`Manifest updated at ${manifestPath}`);
 
         // Load bls.toml and check last deployment
         const blsConfigPath = path.join(process.cwd(), 'bls.toml');
@@ -72,12 +75,16 @@ const deployCommand = new Command('deploy')
         // Submit the archive and manifest
         const manifestBuffer = fs.readFileSync(manifestPath);
         const result = await submitWasmArchive(archiveBuffer, archiveName, manifestBuffer);
-        console.log(`Submission Result: ${JSON.stringify(result)}`);
+        deploySpinner.text = 'Saving Deployment Results ...'
 
         // Update bls.toml with deployment results
         blsConfig.deployments = [result];
         fs.writeFileSync(blsConfigPath, toml.stringify(blsConfig));
-        console.log(`Updated bls.toml with new deployment results`);
+
+        deploySpinner.succeed('Deployment successful.')
+
+        console.log('\nDeployment Results:\n');
+        console.log(`CID: ${result.cid}\n`);
     });
 
 module.exports = deployCommand;

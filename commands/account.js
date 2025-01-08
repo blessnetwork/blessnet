@@ -5,7 +5,7 @@ const accountCommand = new Command('account');
 accountCommand
     .description('Manage your account')
     .action(() => {
-        console.log('Account management command executed');
+        console.log('Account management coming soon!');
     });
 
 module.exports = accountCommand;
