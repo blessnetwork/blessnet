@@ -26,7 +26,7 @@ const initCommand = new Command('init')
         const initSpinner = ora(`${chalk.green("initializing")} a new project at ${installationPath}...`).start()
         try {
             await downloadRepository({
-                repoUrl: "https://github.com/blocklessnetwork/template-javy-typescript-hello-world.git",
+                repoUrl: "https://github.com/blessnetwork/template-javy-typescript-hello-world.git",
                 destination: installationPath
             });
 

@@ -7,6 +7,12 @@ const { execSync } = require('node:child_process');
 const crypto = require('node:crypto');
 const { parseBlsConfig } = require('../lib/config');
 const toml = require('@iarna/toml');
+const chalk = require('chalk');
+
+const getFetch = async () => {
+    const fetch = await import('node-fetch');
+    return fetch.default;
+};
 
 const getOra = async () => {
     const { default: ora } = await import('ora');
@@ -17,6 +23,7 @@ const deployCommand = new Command('deploy')
     .description('Deploy your project')
     .action(async () => {
         const ora = await getOra();
+        const fetch = await getFetch();
         const deploySpinner = ora('Deploying project ...').start()
 
         // Load configuration
@@ -85,6 +92,57 @@ const deployCommand = new Command('deploy')
 
         console.log('\nDeployment Results:\n');
         console.log(`CID: ${result.cid}\n`);
+
+        // Finalize deployment with a POST request
+        try {
+            const blessDeployKeyPath = path.join(process.cwd(), 'bless-deploy.key');
+            const hasBlessDeployKey = fs.existsSync(blessDeployKeyPath);
+            const postData = {
+                destination: result.cid,
+                entry_method: wasmName,
+                return_type: config.return_type // Assuming return_type is in the config file
+            };
+
+            if (hasBlessDeployKey) {
+                const updaterId = fs.readFileSync(blessDeployKeyPath, 'utf-8');
+                postData.updater_id = updaterId;
+                postData.host = blsConfig.host; // Assuming host is in the blsConfig file
+
+                const response = await fetch('http://ingress.bls.dev/update', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+                const responseData = await response.json();
+                console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
+            } else {
+                const response = await fetch('http://ingress.bls.dev/insert', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(postData)
+                });
+                const responseData = await response.json();
+                console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
+
+                console.log(`${chalk.red("!!! WARNING: !!!")}\n`);
+                console.log(`${chalk.red("Backup and don't share the ** bless-deploy.key ** file in the project root")}`);
+                console.log(`${chalk.red("This is the 'password' to update the deployment URL to a new version of ")}`);
+                console.log(`${chalk.red("the project when it is redeployed.")}\n`);
+
+                // Save updater_id to bless-deploy.key
+                fs.writeFileSync(blessDeployKeyPath, responseData.updater_id);
+
+                // Update bls.toml with deployment results including host
+                blsConfig.host = responseData.host;
+                fs.writeFileSync(blsConfigPath, toml.stringify(blsConfig));
+            }
+        } catch (error) {
+            console.error('Error finalizing deployment:', error);
+        }
     });
 
 module.exports = deployCommand;

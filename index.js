@@ -79,6 +79,9 @@ async function main() {
                 console.log(chalk.yellow(`Deployment Status: ${chalk.green("Deployed")}`));
                 console.log(chalk.yellow(`CID: ${deployment.cid}`));
                 console.log(`${chalk.yellow("Created:")}  ${createdDate}\n`);
+                if (deployment.host) {
+                    console.log(`${chalk.yellow("Web2 Host:")} https://${deployment.host}\n`);
+                }
             } else {
                 console.log(chalk.yellow("Deployment Status: Not Deployed\n"));
             }
@@ -136,7 +139,7 @@ ${chalk.yellow("Preview your project results in the terminal or web:")}
     program.addHelpText(
         'after',
         `\nvisit ${chalk.blue('https://docs.bless.network')} for more information.
-you are currently ${chalk.green('logged in')} to ${chalk.yellow('dashboard.bless.network')} \n
+you are currently ${chalk.red('logged out')} to ${chalk.yellow('console.bless.network')} \n
 \n`,
     );
 
