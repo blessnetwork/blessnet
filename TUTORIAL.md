@@ -4,8 +4,7 @@ Blessnet is a powerful tool designed to streamline your development workflow for
 
 This guide will walk you through the process of setting up Blessnet, installing necessary components, and creating your first project.
 
-This is a basic tutorial, show casing the smallest building blocks of the BLESS VM Stack.
-
+This is a basic tutorial, showcasing the smallest building blocks of the BLESS VM Stack.
 
 ## Install NVM
 
@@ -38,7 +37,6 @@ Node Version Manager (NVM) is a tool that allows you to manage multiple versions
 
 Once NVM is installed, you can use it to install and manage different versions of Node.js.
 
-
 ## Install Node/NPM and set as default
 To ensure you have Node.js version 18.18 installed and set as the default version using NVM, follow these steps:
 
@@ -65,7 +63,7 @@ By following these steps, you will have Node.js version 18.18 installed and set 
 
 ## Install BLESS Net
 
-Blessnet will need to install a few extra componments to help with development. Namely the `Bless Secure Runtime`. You can complete this step by running the blessnet CLI for the first time. The CLI will ask if it is ok to install.
+Blessnet will need to install a few extra components to help with development, namely the `Bless Secure Runtime`. You can complete this step by running the blessnet CLI for the first time. The CLI will ask if it is ok to install.
 
 ```bash
 npx blessnet
@@ -131,23 +129,22 @@ Javy is a portable JavaScript Engine that compiles JavaScript to WASM, making it
 
 This reduces the learning curve and accelerates the development process, enabling you to focus on building features rather than dealing with the complexities of lower-level languages.
 
-
 ## Back to the scheduled programming
 
 ### Previewing your app
 
-In the BLESS Network, the simplest way to get output of a program, is to return  to `stdout`, you may know this as `console.log` in javascript.
+In the BLESS Network, the simplest way to get output of a program, is to return to `stdout`, you may know this as `console.log` in JavaScript.
 
-Looking at `index.ts` well simply see
+Looking at `index.ts` we'll simply see
 
 ```javascript
 console.log('hello world')
 ```
 
-If want to build this program and execute it on the Bless VM stack, we can use the preview command!
+If you want to build this program and execute it on the Bless VM stack, we can use the preview command!
 
 ```bash
-npx bless preview
+npx blessnet preview
 ```
 
 We'll see the output like below
@@ -164,12 +161,13 @@ Build file not found, running build...
 ✔ Cleanup successful.
 hello world!
 ```
+
 ### As a web server return
 
-One of the common things, is writing functions that will return to the user as a website. We'll cover how you can deploy to a public cloud a little bit later, but to preview your handy work in the web browser you can simply run the `preview serve` command!
+One of the common things is writing functions that will return to the user as a website. We'll cover how you can deploy to a public cloud a little bit later, but to preview your handiwork in the web browser you can simply run the `preview serve` command!
 
 ```bash
-npx bless preview serve
+npx blessnet preview serve
 ```
 
 The output of the command will look like
@@ -183,9 +181,9 @@ Visit the URL in your web browser to get access to the output served through the
 
 ### Returning other data types
 
-While returning text is useful, sometimes there is a need to return either well structured data, or even HTML back to the user when using the Ingress is needed. 
+While returning text is useful, sometimes there is a need to return either well-structured data, or even HTML back to the user when using the Ingress is needed. 
 
-This change this, simply run the manage command.
+To change this, simply run the manage command.
 
 ```bash
 npx blessnet manage type json
@@ -215,7 +213,7 @@ You can return `html` as well as `raw` p2p responses from the BLESS Network.
 
 ## Go Live! Publish to the Interwebs!
 
-Now that you've made the project, you've learned how to return some simple data types we'll publish this to the information distributed super highway. 
+Now that you've made the project, you've learned how to return some simple data types we'll publish this to the information distributed superhighway. 
 
 We're going to take that `WASM` file and we'll package it with a manifest to upload to IPFS through a `BLESS Network` gateway. This means we're picking up the tab to store this assembly. Slow down though cowboy, it's limited to 10mb and the gateway will inspect the contents. 
 
@@ -251,15 +249,15 @@ This is the 'password' to update the deployment URL to a new version of
 the project when it is redeployed.
 ```
 
-Take note of your friendly url, you can share this around to execute this function and send the return type back to the user as a publically accessible trigger.
+Take note of your friendly URL, you can share this around to execute this function and send the return type back to the user as a publicly accessible trigger.
 
 We've returned you to published CID for IPFS as well, so you can verify the contents of the package.
 
 ### I see this big red text, and bless-deploy.key
 
-`Bless Network` is permissionless, decentralized, and out of anyone's control. The community is free to stand up it's own nodes, and translation ingress'. As such, you should keep track of the `bls-deploy.key`, as this file will allow you to update the function that was deployed on `IPFS` to the existing `Ingress Name`. 
+`Bless Network` is permissionless, decentralized, and out of anyone's control. The community is free to stand up its own nodes, and translation ingress'. As such, you should keep track of the `bls-deploy.key`, as this file will allow you to update the function that was deployed on `IPFS` to the existing `Ingress Name`. 
 
-## Some other items of reguard
+## Some other items of regard
 
 Now that you've finished the tutorial and you are ready to go build, let's take a step back to recap what you've learned, and finalize some other topics we introduced at the start of the tutorial.
 
@@ -279,10 +277,10 @@ By following this tutorial, you now have a solid foundation for developing and d
 
 ### What is IPFS, CIDs and how does the Ingress work with them?
 
-At the end of the tutorial, you heard that we bundle and upload things to IPFS, we've recieved a CID, and we know that there is a friendly URL that we call the "Ingress".
+At the end of the tutorial, you heard that we bundle and upload things to IPFS, we've received a CID, and we know that there is a friendly URL that we call the "Ingress".
 
-IPFS (Interplanitary File System) is a peer-to-peer network for storing and sharing data in a distributed file system. It allows users to host and access files in a decentralized manner, meaning there is no central server. Instead, files are distributed across multiple nodes.
+IPFS (Interplanetary File System) is a peer-to-peer network for storing and sharing data in a distributed file system. It allows users to host and access files in a decentralized manner, meaning there is no central server. Instead, files are distributed across multiple nodes.
 
 CIDs (Content Identifiers) are unique identifiers used in IPFS to reference files. Unlike traditional URLs, which point to a location, CIDs point to the content itself. This means that even if the file is moved to a different location, its CID remains the same as long as the content is unchanged.
 
-The ingress is a simple peice of open source software, that calls into a `BLESS Network` RPC, and executes a FaaS (Function as a Service) program, and then returns the response to a user on the traditional Web.
+The ingress is a simple piece of open source software, that calls into a `BLESS Network` RPC, and executes a FaaS (Function as a Service) program, and then returns the response to a user on the traditional Web.
