@@ -100,7 +100,7 @@ const deployCommand = new Command('deploy')
             const postData = {
                 destination: result.cid,
                 entry_method: wasmName,
-                return_type: config.return_type // Assuming return_type is in the config file
+                return_type: config.type // Assuming return_type is in the config file
             };
 
             if (hasBlessDeployKey) {
