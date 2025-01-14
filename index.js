@@ -31,7 +31,9 @@ const accountCommand = require('./commands/account'); // Import the account comm
 const Box = require("cli-box");
 
 async function main() {
-    if (!fs.existsSync(runtimePath)) {
+    const isVersionCommand = process.argv.includes('version');
+
+    if (!isVersionCommand && !fs.existsSync(runtimePath)) {
 
         const answer = readlineSync.question(chalk.yellow("BLESS environment not found. Do you want to install it? (yes/no): "));
 
@@ -61,7 +63,7 @@ async function main() {
     const isManageCommand = process.argv.includes('manage');
     const isDeployCommand = process.argv.includes('deploy');
 
-    if (fs.existsSync(blsTomlPath)) {
+    if (!isVersionCommand && fs.existsSync(blsTomlPath)) {
         if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
             const blsToml = parseTomlConfig(cwd, 'bls.toml'); // Use parseTomlConfig
 
@@ -103,7 +105,7 @@ async function main() {
     } else {
 
 
-        if (!isInitCommand && !isHelpCommand) {
+        if (!isVersionCommand && !isInitCommand && !isHelpCommand) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")}\n${chalk.yellow("Initialize project? (yes/no): ")}`);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
@@ -162,6 +164,13 @@ you are currently ${chalk.red('logged out')} to ${chalk.yellow('console.bless.ne
     optionsCommand.addCommand(accountCommand);
     optionsCommand.addCommand(buildCommand); // Move the build command under options
     program.addCommand(optionsCommand);
+
+    program
+        .command('version')
+        .description('Show the current version')
+        .action(() => {
+            console.log(`Current version: ${packageJson.version}`);
+        });
 
     await program.parseAsync(process.argv);
 }
