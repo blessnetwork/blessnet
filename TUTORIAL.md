@@ -6,9 +6,28 @@ This guide will walk you through the process of setting up Blessnet, installing 
 
 This is a basic tutorial, showcasing the smallest building blocks of the BLESS VM Stack.
 
+## Table of Contents
+1. [Install NVM](#install-nvm)
+2. [Install Node/NPM and set as default](#install-nodenpm-and-set-as-default)
+3. [Install BLESS Net](#install-bless-net)
+4. [Making your first project](#making-your-first-project)
+5. [How does the project look](#how-does-the-project-look)
+6. [WASM, The Bless Network and Javy](#wasm-the-bless-network-and-javy)
+7. [Back to the scheduled programming](#back-to-the-scheduled-programming)
+    - [Previewing your app](#previewing-your-app)
+    - [As a web server return](#as-a-web-server-return)
+    - [Returning other data types](#returning-other-data-types)
+    - [Update the project to send some simple JSON](#update-the-project-to-send-some-simple-json)
+8. [Go Live! Publish to the Interwebs!](#go-live-publish-to-the-interwebs)
+9. [Some other items of regard](#some-other-items-of-regard)
+    - [Summary of What We Learned](#summary-of-what-we-learned)
+    - [What is IPFS, CIDs and how does the Ingress work with them?](#what-is-ipfs-cids-and-how-does-the-ingress-work-with-them)
+
 ## Install NVM
 
 Node Version Manager (NVM) is a tool that allows you to manage multiple versions of Node.js on your machine. To install NVM, follow these steps:
+
+*If you already have Node.js version 18.18 or higher installed, you can skip to [Install BLESS Net](#install-bless-net).*
 
 1. **Download and install NVM**:
     You can install NVM using the following cURL command:
@@ -39,6 +58,8 @@ Once NVM is installed, you can use it to install and manage different versions o
 
 ## Install Node/NPM and set as default
 To ensure you have Node.js version 18.18 installed and set as the default version using NVM, follow these steps:
+
+*If you already have Node.js version 18.18 or higher installed, you can skip to [Install BLESS Net](#install-bless-net).*
 
 1. **Install Node.js 18.18**:
     Use NVM to install Node.js version 18.18 by running:
