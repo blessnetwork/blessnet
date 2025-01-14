@@ -108,7 +108,7 @@ const deployCommand = new Command('deploy')
                 postData.updater_id = updaterId;
                 postData.host = blsConfig.host; // Assuming host is in the blsConfig file
 
-                const response = await fetch('http://ingress.bls.dev/update', {
+                const response = await fetch('https://ingress.bls.dev/update', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -118,7 +118,7 @@ const deployCommand = new Command('deploy')
                 const responseData = await response.json();
                 console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
             } else {
-                const response = await fetch('http://ingress.bls.dev/insert', {
+                const response = await fetch('https://ingress.bls.dev/insert', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
