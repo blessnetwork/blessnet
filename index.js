@@ -19,6 +19,8 @@ const isLinked = require('node:fs').existsSync(require('node:path').join(__dirna
 const version = isLinked ? `${packageJson.version}-dev` : packageJson.version;
 const blessnetDir = path.join(require('node:os').homedir(), '.blessnet');
 const runtimePath = path.join(blessnetDir, 'bin', 'bls-runtime');
+const authTokenPath = path.join(blessnetDir, 'auth_token');
+const isLoggedIn = fs.existsSync(authTokenPath);
 
 // commands
 const initCommand = require('./commands/init');
@@ -32,8 +34,9 @@ const Box = require("cli-box");
 
 async function main() {
     const isVersionCommand = process.argv.includes('version');
+    const isOptionsCommand = process.argv.includes('options'); // Check if options command is used
 
-    if (!isVersionCommand && !fs.existsSync(runtimePath)) {
+    if (!isVersionCommand && !isOptionsCommand && !fs.existsSync(runtimePath)) {
 
         const answer = readlineSync.question(chalk.yellow("BLESS environment not found. Do you want to install it? (yes/no): "));
 
@@ -63,7 +66,7 @@ async function main() {
     const isManageCommand = process.argv.includes('manage');
     const isDeployCommand = process.argv.includes('deploy');
 
-    if (!isVersionCommand && fs.existsSync(blsTomlPath)) {
+    if (!isVersionCommand && !isOptionsCommand && fs.existsSync(blsTomlPath)) {
         if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
             const blsToml = parseTomlConfig(cwd, 'bls.toml'); // Use parseTomlConfig
 
@@ -105,7 +108,7 @@ async function main() {
     } else {
 
 
-        if (!isVersionCommand && !isInitCommand && !isHelpCommand) {
+        if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")}\n${chalk.yellow("Initialize project? (yes/no): ")}`);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
@@ -141,7 +144,8 @@ ${chalk.yellow("Preview your project results in the terminal or web:")}
     program.addHelpText(
         'after',
         `\nvisit ${chalk.blue('https://docs.bless.network')} for more information.
-you are currently ${chalk.red('logged out')} to ${chalk.yellow('console.bless.network')} \n
+you are currently ${isLoggedIn ? chalk.green('logged in') : chalk.red('logged out')} to ${chalk.yellow('bless.network')} \n
+${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account login')}\n` : ''}
 \n`,
     );
 
@@ -151,7 +155,7 @@ you are currently ${chalk.red('logged out')} to ${chalk.yellow('console.bless.ne
         .version(version);
 
     // Register commands
-    if (fs.existsSync(blsTomlPath) || isInitCommand || isHelpCommand) {
+    if (fs.existsSync(blsTomlPath) || isInitCommand || isHelpCommand || isOptionsCommand) {
         program.addCommand(initCommand);
     }
     program.addCommand(previewCommand);
