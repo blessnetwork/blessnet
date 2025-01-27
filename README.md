@@ -30,6 +30,18 @@ BLESS environment installed successfully.
 You can now use the `blessnet` command.
 ```
 
+## commands
+
+| Command       | Description                             | Subcommands                     |
+|---------------|-----------------------------------------|---------------------------------|
+| `init`        | Initialize a new project                | -                               |
+| `deploy`      | Deploy your project                     | -                               |
+| `build`       | Build the project                       | `--debug`                       |
+| `wallet`      | Manage Solana wallets                   | `create`, `info`                |
+| `preview`     | Preview your project                    | `serve`                         |
+| `manage`      | Manage your project                     | `type [newType]`                |
+| `account`     | Manage your account                     | `login`, `logout`               |
+
 ## details
 
 Create a new project with the name `foo`, the project will have a folder created called `foo`
