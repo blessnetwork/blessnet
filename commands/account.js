@@ -65,4 +65,18 @@ accountCommand
         }, 180000); // 3 minutes
     });
 
+accountCommand
+    .command('logout')
+    .description('Logout from your account')
+    .action(() => {
+        const blessnetDir = path.join(os.homedir(), '.blessnet');
+        const tokenPath = path.join(blessnetDir, 'auth_token');
+        if (fs.existsSync(tokenPath)) {
+            fs.unlinkSync(tokenPath);
+            console.log('Logout successful. Token destroyed.');
+        } else {
+            console.log('No token found. You are not logged in.');
+        }
+    });
+
 module.exports = accountCommand;
