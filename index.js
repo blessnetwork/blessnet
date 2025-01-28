@@ -35,8 +35,9 @@ const Box = require("cli-box");
 async function main() {
     const isVersionCommand = process.argv.includes('version');
     const isOptionsCommand = process.argv.includes('options'); // Check if options command is used
+    const isBuildCommand = process.argv.includes('build'); // Check if build command is used
 
-    if (!isVersionCommand && !isOptionsCommand && !fs.existsSync(runtimePath)) {
+    if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && !fs.existsSync(runtimePath)) {
 
         const answer = readlineSync.question(chalk.yellow("BLESS environment not found. Do you want to install it? (yes/no): "));
 
@@ -66,7 +67,7 @@ async function main() {
     const isManageCommand = process.argv.includes('manage');
     const isDeployCommand = process.argv.includes('deploy');
 
-    if (!isVersionCommand && !isOptionsCommand && fs.existsSync(blsTomlPath)) {
+    if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && fs.existsSync(blsTomlPath)) {
         if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
             const blsToml = parseTomlConfig(cwd, 'bls.toml'); // Use parseTomlConfig
 
@@ -106,9 +107,7 @@ async function main() {
             process.exit(0);
         }
     } else {
-
-
-        if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand) {
+        if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")}\n${chalk.yellow("Initialize project? (yes/no): ")}`);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
@@ -116,6 +115,9 @@ async function main() {
             }
 
             await initCommand.parseAsync(['node', 'init']);
+        } else if (isBuildCommand) {
+            buildCommand.parseAsync(['node', 'build']);
+            process.exit(1);
         }
     }
 
