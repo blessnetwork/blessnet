@@ -33,9 +33,18 @@ const accountCommand = require('./commands/account'); // Import the account comm
 const Box = require("cli-box");
 
 async function main() {
-    const isVersionCommand = process.argv.includes('version');
-    const isOptionsCommand = process.argv.includes('options'); // Check if options command is used
-    const isBuildCommand = process.argv.includes('build'); // Check if build command is used
+
+    const cwd = process.cwd();
+    const blsTomlPath = path.join(cwd, 'bls.toml');
+
+    const isVersionCommand = process.argv.includes('version') || process.argv.includes('-v');
+    const isOptionsCommand = process.argv.includes('options');
+    const isBuildCommand = process.argv.includes('build');
+    const isInitCommand = process.argv.includes('init');
+    const isHelpCommand = process.argv.includes('help') || process.argv.includes('-h') || process.argv.includes('--help');
+    const isPreviewCommand = process.argv.includes('preview');
+    const isManageCommand = process.argv.includes('manage');
+    const isDeployCommand = process.argv.includes('deploy');
 
     if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && !fs.existsSync(runtimePath)) {
 
@@ -58,14 +67,6 @@ async function main() {
 
         await install();
     }
-
-    const cwd = process.cwd();
-    const blsTomlPath = path.join(cwd, 'bls.toml');
-    const isInitCommand = process.argv.includes('init');
-    const isHelpCommand = process.argv.includes('help');
-    const isPreviewCommand = process.argv.includes('preview');
-    const isManageCommand = process.argv.includes('manage');
-    const isDeployCommand = process.argv.includes('deploy');
 
     if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && fs.existsSync(blsTomlPath)) {
         if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
@@ -117,7 +118,10 @@ async function main() {
             await initCommand.parseAsync(['node', 'init']);
         } else if (isBuildCommand) {
             buildCommand.parseAsync(['node', 'build']);
-            process.exit(1);
+            process.exit(0);
+        } else if (isVersionCommand) {
+            console.log(`Current version: ${packageJson.version}`);
+            process.exit(0);
         }
     }
 
