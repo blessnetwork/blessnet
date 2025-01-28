@@ -105,6 +105,9 @@ async function main() {
             console.log("Need more help?:");
             console.log(chalk.green("blessnet help\n"));
 
+            console.log(`\nvisit ${chalk.blue('https://docs.bless.network')} for more information.\nyou are currently ${isLoggedIn ? chalk.green('logged in') : chalk.red('logged out')} to ${chalk.yellow('bless.network')}
+            ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account login')}` : ''}`);
+            console.log('npx blessnet options account logout\n');
             process.exit(0);
         }
     } else {
