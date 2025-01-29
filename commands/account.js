@@ -4,18 +4,20 @@ const CONSTANTS = require('../lib/constants');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const chalk = require('chalk');
 
 const accountCommand = new Command('account');
 
 accountCommand
     .description('Manage your account')
     .action(() => {
-        // Simulate checking login status
-        const isLoggedIn = false; // Replace with actual login status check
+        const blessnetDir = path.join(os.homedir(), '.blessnet');
+        const tokenPath = path.join(blessnetDir, 'auth_token');
+        const isLoggedIn = fs.existsSync(tokenPath); // Check if auth_token file exists
         if (isLoggedIn) {
-            console.log('You are logged in.');
+            console.log(`You are ${chalk.green('logged IN.')}`);
         } else {
-            console.log('You are not logged in.');
+            console.log(`You are ${chalk.red('logged OUT.')}`);
         }
     });
 
