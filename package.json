@@ -1,6 +1,6 @@
 {
   "name": "blessnet",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "The CLI tool for interacting with blessnet",
   "main": "index.js",
   "bin": {
