@@ -6,6 +6,15 @@ const { slugify } = require('../lib/strings');
 const readlineSync = require('readline-sync')
 const chalk = require('chalk');
 
+const checkGitInstalled = () => {
+    try {
+        execSync('git --version', { stdio: 'ignore' });
+    } catch (error) {
+        console.error(chalk.red('Error: git is not installed or not found in PATH.'));
+        process.exit(1);
+    }
+};
+
 const getOra = async () => {
     const { default: ora } = await import('ora');
     return ora;
@@ -15,6 +24,7 @@ const initCommand = new Command('init')
     .argument('[name]', 'name of the project',)
     .description('Initialize a new project')
     .action(async (name) => {
+        checkGitInstalled(); // Check if git is installed
 
         const projectName = name || readlineSync.question('Enter a name for the project: ');
         const installationPath = path.join(process.cwd(), projectName);
@@ -33,9 +43,9 @@ const initCommand = new Command('init')
 
             initSpinner.text = "initializing dependencies..."
 
-            execSync(`cd ${installationPath}; npm pkg set name=${sanitizedName}`)
-            execSync(`cd ${installationPath}; npm pkg set bls.functionId=${functionId}`)
-            execSync(`cd ${installationPath}; npm install`, { stdio: 'ignore' })
+            execSync(`cd ${installationPath} && npm pkg set name=${sanitizedName}`)
+            execSync(`cd ${installationPath} && npm pkg set bls.functionId=${functionId}`)
+            execSync(`cd ${installationPath} && npm install`, { stdio: 'ignore' })
 
 
             initSpinner.succeed('project initialized successful.')
@@ -43,6 +53,7 @@ const initCommand = new Command('init')
             console.log(`cd ${projectName} and run blessnet to get started.`);
             console.log('');
         } catch (error) {
+            initSpinner.fail('Failed to initialize project.');
             console.error(error.message);
         }
     });

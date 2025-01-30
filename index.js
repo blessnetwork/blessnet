@@ -18,7 +18,7 @@ const { parseTomlConfig } = require('./lib/config'); // Import parseTomlConfig
 const isLinked = require('node:fs').existsSync(require('node:path').join(__dirname, 'node_modules', '.bin'));
 const version = isLinked ? `${packageJson.version}-dev` : packageJson.version;
 const blessnetDir = path.join(require('node:os').homedir(), '.blessnet');
-const runtimePath = path.join(blessnetDir, 'bin', 'bls-runtime');
+const runtimePath = path.join(blessnetDir, 'bin', `bls-runtime${process.platform === 'win32' ? '.exe' : ''}`);
 const authTokenPath = path.join(blessnetDir, 'auth_token');
 const isLoggedIn = fs.existsSync(authTokenPath);
 
