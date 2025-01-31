@@ -16,6 +16,10 @@ if (!fs.existsSync(BLESSNET_DIR)) {
 const createWalletCommand = new Command('create').addArgument('name')
     .description('Create a new Solana wallet')
     .action((name) => {
+        if (!name) {
+            name = `wallet-${crypto.randomBytes(4).toString('hex')}`;
+            console.log(chalk.yellow(`No name provided. Generated random wallet name: ${name}`));
+        }
         console.log(chalk.green('Creating a new Solana wallet...'));
         const rl = readline.createInterface({
             input: process.stdin,
@@ -26,7 +30,7 @@ const createWalletCommand = new Command('create').addArgument('name')
         const walletDir = path.join(BLESSNET_DIR, name);
         if (fs.existsSync(walletDir)) {
             rl.question(chalk.yellow(`Wallet ${name} already exists. Do you want to overwrite it? (yes/no): `), (answer) => {
-                if (answer.toLowerCase() !== 'yes') {
+                if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
                     console.log(chalk.red('Wallet creation aborted.'));
                     rl.close();
                     return;
