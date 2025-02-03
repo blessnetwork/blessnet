@@ -76,7 +76,8 @@ const deployCommand = new Command('deploy')
 
         if (lastDeployment && lastDeployment.runtime.checksum === archiveChecksum) {
             console.log('No changes detected since the last deployment. Skipping deployment.');
-            return;
+            deploySpinner.stop();
+            process.exit(0);
         }
 
         // Submit the archive and manifest
@@ -142,7 +143,9 @@ const deployCommand = new Command('deploy')
             }
         } catch (error) {
             console.error('Error finalizing deployment:', error);
+            process.exit(1);
         }
+        process.exit(0);
     });
 
 module.exports = deployCommand;
