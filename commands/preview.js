@@ -15,7 +15,7 @@ previewCommand
 previewCommand
     .action(async () => { // Updated to use async/await
         try {
-            const result = await run({ stdin: 'echo "hello"' }); // Pass options to run function
+            const result = await run(); // Pass options to run function
             console.log(result);
         } catch (error) {
             console.error('Error:', error);
