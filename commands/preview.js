@@ -15,8 +15,20 @@ previewCommand
 previewCommand
     .action(async () => { // Updated to use async/await
         try {
-            const result = await run(); // Pass options to run function
-            console.log(result);
+            let input = '';
+            process.stdin.setEncoding('utf8');
+            process.stdin.on('data', chunk => {
+                input += chunk;
+            });
+            process.stdin.on('end', async () => {
+                try {
+                    const result = await run({ stdin: input }); // Pass stdin input to run function
+                    console.log(result);
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            });
+            process.stdin.resume();
         } catch (error) {
             console.error('Error:', error);
         }
