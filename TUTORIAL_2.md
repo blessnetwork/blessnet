@@ -57,3 +57,32 @@ server.get("/other", (req, res) => {
 
 server.start();
 ```
+
+### Serving Static Files
+
+There is often a need to server static files, images, styles, client side javascript. We've also provided a quick feature that takes care of that for you, you may recognize this command from another JavaScript based framework.
+
+`server.static("static", "public");`
+
+The break down of this command, is that we're going to take the `static` folder in our project path, and we'll serve files out of it when a route that has `/public` in the path, and then matches the rest of the file layout.
+
+
+The full project would resemble
+
+```javascript
+import WebServer from "@blockless/sdk-ts/dist/lib/web";
+
+const server = new WebServer();
+
+server.static("/static", "public");
+
+server.get("/", (req, res) => {
+	res.send("Hello World from Root /");
+});
+
+server.get("/other", (req, res) => {
+	res.send("Hello World from /other");
+});
+
+server.start();
+```
