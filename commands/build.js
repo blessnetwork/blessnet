@@ -6,10 +6,12 @@ const buildCommand = new Command('build')
     .description('Build the project')
     .option('--debug', 'Build in debug mode')
     .action((options) => {
-        console.log('Scanning for static path configurations...');
         const staticPaths = scanJSFiles(process.cwd());
-        createAssetsJson(staticPaths);
-        console.log('Generated assets file: bls.assets.json');
+
+        if (staticPaths.length > 0) {
+            createAssetsJson(staticPaths);
+            console.log('Generated assets file: bls.assets.json');
+        }
 
         const buildCommand = options.debug ? 'npm run build:debug' : 'npm run build:release';
         execSync(buildCommand, { stdio: 'inherit' });
