@@ -42,8 +42,6 @@ server.start();
 
 Adding new routes to your application is easy, add a new `server.get` and define the path that should be caught when queried from your application.
 
-```
-
 ```javascript
 import WebServer from "@blockless/sdk-ts/dist/lib/web";
 
