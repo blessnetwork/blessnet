@@ -48,9 +48,9 @@ const initCommand = new Command('init')
             execSync(`cd ${installationPath} && npm install`, { stdio: 'ignore' })
 
 
-            initSpinner.succeed('project initialized successful.')
+            initSpinner.succeed('Project initialized successfully.')
             console.log('');
-            console.log(`cd ${projectName} and run blessnet to get started.`);
+            console.log(`Run 'cd ${projectName}' and 'blessnet' to get started.`);
             console.log('');
         } catch (error) {
             initSpinner.fail('Failed to initialize project.');

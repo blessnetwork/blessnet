@@ -129,10 +129,10 @@ const deployCommand = new Command('deploy')
                 const responseData = await response.json();
                 console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
 
-                console.log(`${chalk.red("!!! WARNING: !!!")}\n`);
-                console.log(`${chalk.red("Backup and don't share the ** bless-deploy.key ** file in the project root")}`);
-                console.log(`${chalk.red("This is the 'password' to update the deployment URL to a new version of ")}`);
-                console.log(`${chalk.red("the project when it is redeployed.")}\n`);
+                console.log(`${chalk.red("!!! WARNING !!!")}\n`);
+                console.log(`${chalk.red("Back up and do not share the ** bless-deploy.key ** file in the project root.")}`);
+                console.log(`${chalk.red("This key acts as a 'password' for updating the deployment URL when")}`);
+                console.log(`${chalk.red("the project is redeployed.")}\n`);
 
                 // Save updater_id to bless-deploy.key
                 fs.writeFileSync(blessDeployKeyPath, responseData.updater_id);
