@@ -1,9 +1,9 @@
 const { Command } = require('commander');
 const { v4: uuidv4 } = require('uuid');
 const CONSTANTS = require('../lib/constants');
-const fs = require('fs');
-const path = require('path');
-const os = require('os');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
 const chalk = require('chalk');
 
 const accountCommand = new Command('account');
