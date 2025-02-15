@@ -1,6 +1,7 @@
 const { Command } = require('commander');
 const { startServer } = require('../lib/server');
 const { run } = require('../lib/invoke'); // Corrected to use run function from invoke.js
+const buildCommand = require('../commands/build'); // Import buildCommand
 
 const previewCommand = new Command('preview')
     .description('Preview your project');
@@ -8,7 +9,8 @@ const previewCommand = new Command('preview')
 previewCommand
     .command('serve')
     .description('Start the preview server')
-    .action(() => {
+    .action(async () => {
+        await buildCommand.parseAsync(['node', 'build.js', '--debug']); // Run build command with debug option
         startServer();
     });
 
@@ -22,6 +24,7 @@ previewCommand
             });
             process.stdin.on('end', async () => {
                 try {
+                    await buildCommand.parseAsync(['node', 'build.js', '--debug']); // Run build command with debug option
                     const result = await run({ stdin: input }); // Pass stdin input to run function
                     console.log(result);
                 } catch (error) {

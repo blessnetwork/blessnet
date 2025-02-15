@@ -13,9 +13,9 @@ const buildCommand = new Command('build')
             createAssetsJson(staticPaths);
 
             // Add setStatics line to source files
-            staticPaths.forEach(({ sourcePath }) => {
+            for (const { sourcePath } of staticPaths) {
                 addStaticsImport(sourcePath);
-            });
+            }
         }
 
         const buildCommand = options.debug ? 'npm run build:debug' : 'npm run build:release';
@@ -23,9 +23,9 @@ const buildCommand = new Command('build')
 
         // Remove setStatics line after build
         if (staticPaths.length > 0) {
-            staticPaths.forEach(({ sourcePath }) => {
+            for (const { sourcePath } of staticPaths) {
                 removeStaticsImport(sourcePath);
-            });
+            }
         }
     });
 
