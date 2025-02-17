@@ -71,7 +71,7 @@ const createWalletCommand = new Command('create').addArgument('name')
                     encryptedSecretKey: encrypted
                 };
                 fs.writeFileSync(walletFile, JSON.stringify(walletData, null, 2));
-                console.log(chalk.green(`Solana wallet ${name} created and encrypted into ${walletFile}`));
+                console.log(chalk.green(`Solana wallet "${name}" has been created and encrypted in ${walletFile}`));
             });
         }
     });

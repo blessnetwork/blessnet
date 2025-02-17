@@ -13,16 +13,16 @@ const listWalletsCommand = new Command('list')
             return fs.statSync(dirPath).isDirectory() && fs.existsSync(path.join(dirPath, 'wallet.json'));
         });
         if (walletDirs.length === 0) {
-            console.log('No wallets found.');
+            console.log('No wallets found');
         } else {
-            console.log('Wallets:');
+            console.log('Available wallets:');
             walletDirs.forEach(dir => {
                 const walletFilePath = path.join(BLESSNET_DIR, dir, 'wallet.json');
                 if (fs.existsSync(walletFilePath)) {
                     const walletData = JSON.parse(fs.readFileSync(walletFilePath, 'utf8'));
-                    console.log(`- ${dir}: ${walletData.publicKey}`);
+                    console.log(`  ${dir}: ${walletData.publicKey}`);
                 } else {
-                    console.log(`- ${dir}: wallet.json not found`);
+                    console.log(`  ${dir}: Wallet.json file not found`);
                 }
             });
         }

@@ -15,9 +15,9 @@ accountCommand
         const tokenPath = path.join(blessnetDir, 'auth_token');
         const isLoggedIn = fs.existsSync(tokenPath); // Check if auth_token file exists
         if (isLoggedIn) {
-            console.log(`You are ${chalk.green('logged IN.')}`);
+            console.log(`You are ${chalk.green('logged in.')}`);
         } else {
-            console.log(`You are ${chalk.red('logged OUT.')}`);
+            console.log(`You are ${chalk.red('logged out.')}`);
         }
     });
 
@@ -26,7 +26,7 @@ accountCommand
     .description('Login to your account')
     .action(() => {
         const guid = uuidv4();
-        console.log(`Please login at: ${CONSTANTS.authHost}/?lid=${guid}&clientid=${CONSTANTS.blessAuthClientId}`);
+        console.log(`Please log in at: ${CONSTANTS.authHost}/?lid=${guid}&clientid=${CONSTANTS.blessAuthClientId}`);
 
         const checkLoginStatus = async () => {
             try {

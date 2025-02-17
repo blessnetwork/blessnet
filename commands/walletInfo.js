@@ -12,7 +12,7 @@ const walletInfoCommand = new Command('info').addArgument('name')
     .action((name) => {
         const walletFile = path.join(BLESSNET_DIR, `${name}.json`);
         if (!fs.existsSync(walletFile)) {
-            console.log(`Wallet ${name} not found.`);
+            console.log(`The wallet "${name}" was not found.`);
             return;
         }
 
@@ -26,7 +26,7 @@ const walletInfoCommand = new Command('info').addArgument('name')
             rl.close();
 
             if (!encryptionKey) {
-                console.log('Encryption key is required.');
+                console.log('An encryption key is required.');
                 return;
             }
 
@@ -37,7 +37,7 @@ const walletInfoCommand = new Command('info').addArgument('name')
 
             const secretKey = JSON.parse(decrypted);
             const keypair = Keypair.fromSecretKey(Uint8Array.from(secretKey));
-            console.log(`Wallet ${name} public key: ${keypair.publicKey.toBase58()}`);
+            console.log(`The public key for wallet "${name}" is: ${keypair.publicKey.toBase58()}`);
         });
     });
 
