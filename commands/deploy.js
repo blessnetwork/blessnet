@@ -29,6 +29,14 @@ const deployCommand = new Command('deploy')
         // Load configuration
         const config = parseBlsConfig(process.cwd());
 
+        // Get the appropriate API endpoint and key file
+        const isDev = config.environment === 'development';
+        const apiEndpoint = isDev ? 'https://dev.bls.dev' : 'https://ingress.bls.dev';
+        const blessDeployKeyPath = path.join(
+            process.cwd(),
+            isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'
+        );
+
         // Check if release build exists
         const releasePath = path.join(process.cwd(), config.build_release.dir, "release.wasm");
         if (!fs.existsSync(releasePath)) {
@@ -96,7 +104,6 @@ const deployCommand = new Command('deploy')
 
         // Finalize deployment with a POST request
         try {
-            const blessDeployKeyPath = path.join(process.cwd(), 'bless-deploy.key');
             const hasBlessDeployKey = fs.existsSync(blessDeployKeyPath);
             const postData = {
                 destination: result.cid,
@@ -107,9 +114,9 @@ const deployCommand = new Command('deploy')
             if (hasBlessDeployKey) {
                 const updaterId = fs.readFileSync(blessDeployKeyPath, 'utf-8');
                 postData.updater_id = updaterId;
-                postData.host = blsConfig.host; // Assuming host is in the blsConfig file
+                postData.host = isDev ? blsConfig.development_host : blsConfig.production_host;
 
-                const response = await fetch('https://ingress.bls.dev/update', {
+                const response = await fetch(`${apiEndpoint}/update`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -119,7 +126,7 @@ const deployCommand = new Command('deploy')
                 const responseData = await response.json();
                 console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
             } else {
-                const response = await fetch('https://ingress.bls.dev/insert', {
+                const response = await fetch(`${apiEndpoint}/insert`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -130,15 +137,19 @@ const deployCommand = new Command('deploy')
                 console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
 
                 console.log(`${chalk.red("!!! WARNING !!!")}\n`);
-                console.log(`${chalk.red("Back up and do not share the ** bless-deploy.key ** file in the project root.")}`);
+                console.log(`${chalk.red("Back up and do not share the ** " + (isDev ? "bless-deploy-dev.key" : "bless-deploy.key") + " ** file in the project root.")}`);
                 console.log(`${chalk.red("This key acts as a 'password' for updating the deployment URL when")}`);
                 console.log(`${chalk.red("the project is redeployed.")}\n`);
 
-                // Save updater_id to bless-deploy.key
+                // Save updater_id to appropriate key file
                 fs.writeFileSync(blessDeployKeyPath, responseData.updater_id);
 
-                // Update bls.toml with deployment results including host
-                blsConfig.host = responseData.host;
+                // Update bls.toml with deployment results including appropriate host
+                if (isDev) {
+                    blsConfig.development_host = responseData.host;
+                } else {
+                    blsConfig.production_host = responseData.host;
+                }
                 fs.writeFileSync(blsConfigPath, toml.stringify(blsConfig));
             }
         } catch (error) {

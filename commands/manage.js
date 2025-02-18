@@ -32,10 +32,35 @@ manageCommand
     });
 
 manageCommand
+    .command('env [newEnv]')
+    .description('Change the deployment environment (production/development)')
+    .action((newEnv) => {
+        const cwd = process.cwd();
+        const config = parseBlsConfig(cwd);
+        const environments = ['production', 'development'];
+        let selectedEnv;
+
+        if (!newEnv || !environments.includes(newEnv.toLowerCase())) {
+            const index = readlineSync.keyInSelect(environments, chalk.yellow('Select the deployment environment:'));
+            if (index !== -1) {
+                selectedEnv = environments[index];
+            } else {
+                console.log('No changes were made to the environment.\n');
+                return;
+            }
+        }
+
+        config.environment = (newEnv || selectedEnv).toLowerCase();
+        saveBlsConfig(config, cwd);
+        console.log(chalk.green(`Deployment environment has been set to ${config.environment}.`));
+    });
+
+manageCommand
     .action(() => {
         const cwd = process.cwd();
         const config = parseBlsConfig(cwd);
         console.log(`Current return type is: ${config.type}`);
+        console.log(`Current environment is: ${config.environment || 'production'}`);
 
         const answer = readlineSync.question(chalk.yellow('Would you like to change anything about the project? (yes/no): '));
         if (['yes', 'y'].includes(answer.toLowerCase())) {
@@ -52,6 +77,19 @@ manageCommand
                 }
             } else {
                 console.log('No changes were made to the project type.');
+            }
+
+            const changeEnv = readlineSync.question(chalk.yellow('Would you like to change the deployment environment? (yes/no): '));
+            if (['yes', 'y'].includes(changeEnv.toLowerCase())) {
+                const environments = ['production', 'development'];
+                const index = readlineSync.keyInSelect(environments, chalk.yellow('Select the deployment environment:'));
+                if (index !== -1) {
+                    config.environment = environments[index];
+                    saveBlsConfig(config, cwd);
+                    console.log(chalk.green(`Deployment environment has been set to ${config.environment}.`));
+                } else {
+                    console.log('No changes were made to the environment.\n');
+                }
             }
         } else {
             console.log('No changes were made.');
