@@ -27,7 +27,7 @@ const deployCommand = new Command('deploy')
         const ora = await getOra();
         const fetch = await getFetch();
 
-        await buildCommand.parseAsync(['node', 'build.js', '--debug']);
+        await buildCommand.parseAsync(['node', 'build.js']);
 
         const deploySpinner = ora('Deploying project ...').start()
 
