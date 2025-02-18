@@ -8,6 +8,8 @@ const crypto = require('node:crypto');
 const { parseBlsConfig } = require('../lib/config');
 const toml = require('@iarna/toml');
 const chalk = require('chalk');
+const buildCommand = require('../commands/build'); // Import buildCommand
+
 
 const getFetch = async () => {
     const fetch = await import('node-fetch');
@@ -24,6 +26,9 @@ const deployCommand = new Command('deploy')
     .action(async () => {
         const ora = await getOra();
         const fetch = await getFetch();
+
+        await buildCommand.parseAsync(['node', 'build.js', '--debug']);
+
         const deploySpinner = ora('Deploying project ...').start()
 
         // Load configuration
