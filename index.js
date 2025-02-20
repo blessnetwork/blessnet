@@ -45,6 +45,7 @@ async function main() {
     const isPreviewCommand = process.argv.includes('preview');
     const isManageCommand = process.argv.includes('manage');
     const isDeployCommand = process.argv.includes('deploy');
+    const hasDeployTarget = isDeployCommand && process.argv.length > 3;
 
     if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && !fs.existsSync(runtimePath)) {
 
@@ -68,7 +69,8 @@ async function main() {
         await install();
     }
 
-    if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && fs.existsSync(blsTomlPath)) {
+    // Skip bls.toml check if we're doing a targeted deploy
+    if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && fs.existsSync(blsTomlPath) && !hasDeployTarget) {
         if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
             const blsToml = parseTomlConfig(cwd, 'bls.toml'); // Use parseTomlConfig
 
@@ -111,7 +113,7 @@ async function main() {
             process.exit(0);
         }
     } else {
-        if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand) {
+        if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand && !hasDeployTarget) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")}\n${chalk.yellow("Initialize project? (yes/no): ")}`);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {

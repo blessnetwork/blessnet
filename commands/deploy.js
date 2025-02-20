@@ -9,7 +9,8 @@ const { parseBlsConfig } = require('../lib/config');
 const toml = require('@iarna/toml');
 const chalk = require('chalk');
 const buildCommand = require('../commands/build'); // Import buildCommand
-
+const initCommand = require('../commands/init'); // Import initCommand
+const manageCommand = require('../commands/manage'); // Add manage command import
 
 const getFetch = async () => {
     const fetch = await import('node-fetch');
@@ -23,27 +24,79 @@ const getOra = async () => {
 
 const deployCommand = new Command('deploy')
     .description('Deploy your project')
-    .action(async () => {
+    .argument('[targetFolder]', 'target folder for deployment')
+    .option('--env <environment>', 'deployment environment (production/development)')
+    .action(async (targetFolder, options) => {
         const ora = await getOra();
         const fetch = await getFetch();
 
+        let projectPath = process.cwd();
+        const originalCwd = process.cwd();
+
+        if (targetFolder) {
+            // Convert targetFolder to absolute path and verify it exists
+            const absoluteTargetPath = path.resolve(originalCwd, targetFolder);
+            if (!fs.existsSync(absoluteTargetPath)) {
+                console.error(chalk.red(`Target folder ${absoluteTargetPath} does not exist`));
+                process.exit(1);
+            }
+
+            // Use fixed temporary directory
+            const tmpDir = path.join(originalCwd, '.bls', 'tmp-deploy');
+            fs.rmSync(tmpDir, { recursive: true, force: true }); // Clean up any existing tmp directory
+            fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
+
+            // Initialize a new project in the temp directory
+            process.chdir(path.dirname(tmpDir));
+            await initCommand.parseAsync(['node', 'init', path.basename(tmpDir)]);
+
+            // Copy target folder contents to public directory
+            const publicDir = path.join(tmpDir, 'public');
+            fs.rmSync(publicDir, { recursive: true, force: true });
+            fs.mkdirSync(publicDir, { recursive: true });
+            fs.cpSync(absoluteTargetPath, publicDir, { recursive: true });
+
+            // Update index.ts for static file serving
+            const indexTsContent = `import WebServer from "@blockless/sdk-ts/dist/lib/web";
+
+const server = new WebServer();
+
+server.statics("public", "/");
+
+server.start();
+`;
+            fs.writeFileSync(path.join(tmpDir, 'index.ts'), indexTsContent);
+
+            // Use temporary directory as project path
+            projectPath = tmpDir;
+            // Change working directory to temporary project
+            process.chdir(projectPath);
+
+            // Set environment if specified
+            if (options.env) {
+                await manageCommand.commands
+                    .find(cmd => cmd.name() === 'env')
+                    .parseAsync(['node', 'env', options.env]);
+            }
+        }
+
         await buildCommand.parseAsync(['node', 'build.js']);
 
-        const deploySpinner = ora('Deploying project ...').start()
+        const deploySpinner = ora('Deploying project ...').start();
 
-        // Load configuration
-        const config = parseBlsConfig(process.cwd());
+        // Load configuration from the correct path
+        const config = parseBlsConfig(projectPath);
 
-        // Get the appropriate API endpoint and key file
+        // Update all path operations to use projectPath instead of process.cwd()
         const isDev = config.environment === 'development';
         const apiEndpoint = isDev ? 'https://dev.bls.dev' : 'https://ingress.bls.dev';
         const blessDeployKeyPath = path.join(
-            process.cwd(),
+            projectPath,
             isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'
         );
 
         // Check if release build exists
-        const releasePath = path.join(process.cwd(), config.build_release.dir, "release.wasm");
+        const releasePath = path.join(projectPath, config.build_release.dir, "release.wasm");
         if (!fs.existsSync(releasePath)) {
             deploySpinner.text = "Building release ...";
             execSync(config.build_release.command, { stdio: 'inherit' });
@@ -52,18 +105,18 @@ const deployCommand = new Command('deploy')
         // Rename release.wasm to the package.json name
         const packageJson = require('../package.json');
         const wasmName = `${packageJson.name}.wasm`;
-        const renamedWasmPath = path.join(process.cwd(), config.build_release.dir, wasmName);
+        const renamedWasmPath = path.join(projectPath, config.build_release.dir, wasmName);
         fs.renameSync(releasePath, renamedWasmPath);
 
         // Generate manifest.json
         const manifest = createWasmManifest(wasmName, 'application/javascript');
-        const manifestPath = path.join(process.cwd(), config.build_release.dir, 'manifest.json');
+        const manifestPath = path.join(projectPath, config.build_release.dir, 'manifest.json');
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
         // Create archive of manifest.json and the renamed wasm file
         const archiveName = `${packageJson.name}.tar.gz`;
-        const archivePath = path.join(process.cwd(), config.build_release.dir, archiveName);
-        const archiveBuffer = await createWasmArchive(path.join(process.cwd(), config.build_release.dir), archiveName, wasmName);
+        const archivePath = path.join(projectPath, config.build_release.dir, archiveName);
+        const archiveBuffer = await createWasmArchive(path.join(projectPath, config.build_release.dir), archiveName, wasmName);
 
         deploySpinner.text = 'Publishing Archive Created ...'
         // Update manifest with new values
@@ -82,7 +135,7 @@ const deployCommand = new Command('deploy')
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
         // Load bls.toml and check last deployment
-        const blsConfigPath = path.join(process.cwd(), 'bls.toml');
+        const blsConfigPath = path.join(projectPath, 'bls.toml');
         const blsConfig = toml.parse(fs.readFileSync(blsConfigPath, 'utf-8'));
         const deployments = blsConfig.deployments || [];
         const lastDeployment = deployments[deployments.length - 1];
@@ -161,6 +214,14 @@ const deployCommand = new Command('deploy')
             console.error('Error finalizing deployment:', error);
             process.exit(1);
         }
+
+        // Cleanup temporary directory if it was created
+        if (targetFolder) {
+            // Change back to original directory before cleanup
+            process.chdir(originalCwd);
+            fs.rmSync(path.join(process.cwd(), '.bls'), { recursive: true, force: true });
+        }
+
         process.exit(0);
     });
 
