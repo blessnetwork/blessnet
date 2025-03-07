@@ -16,16 +16,7 @@ jobs:
           node-version: 18
           cache: yarn
 
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Build
-        run: yarn build
-
-      - name: Make Executable
-        run: chmod +x ./dist/bundler/index.js
-
-      - name: Publish Core
+      - name: Publish CLI
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
