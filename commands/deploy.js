@@ -91,7 +91,7 @@ server.start();
         const isDev = config.environment === 'development';
         const apiEndpoint = isDev ? 'https://dev.bls.dev' : 'https://ingress.bls.dev';
         const blessDeployKeyPath = path.join(
-            projectPath,
+            originalCwd,
             isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'
         );
 
@@ -135,7 +135,7 @@ server.start();
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
         // Load bls.toml and check last deployment
-        const blsConfigPath = path.join(projectPath, 'bls.toml');
+        const blsConfigPath = path.join(originalCwd, 'bls.toml');
         const blsConfig = toml.parse(fs.readFileSync(blsConfigPath, 'utf-8'));
         const deployments = blsConfig.deployments || [];
         const lastDeployment = deployments[deployments.length - 1];
@@ -198,7 +198,6 @@ server.start();
                 console.log(`${chalk.red("Back up and do not share the ** " + (isDev ? "bless-deploy-dev.key" : "bless-deploy.key") + " ** file in the project root.")}`);
                 console.log(`${chalk.red("This key acts as a 'password' for updating the deployment URL when")}`);
                 console.log(`${chalk.red("the project is redeployed.")}\n`);
-
                 // Save updater_id to appropriate key file
                 fs.writeFileSync(blessDeployKeyPath, responseData.updater_id);
 
@@ -209,6 +208,7 @@ server.start();
                     blsConfig.production_host = responseData.host;
                 }
                 fs.writeFileSync(blsConfigPath, toml.stringify(blsConfig));
+                fs.copyFileSync(blsConfigPath, path.join(originalCwd, 'bls.toml'));
             }
         } catch (error) {
             console.error('Error finalizing deployment:', error);
