@@ -1,5 +1,5 @@
 const { Command } = require('commander');
-const { parseBlsConfig, saveBlsConfig } = require('../lib/config');
+const { parseBlsConfig, saveBlsConfig, updateNodeCount } = require('../lib/config');
 const readlineSync = require('readline-sync');
 const chalk = require('chalk');
 const path = require('node:path');
@@ -56,11 +56,38 @@ manageCommand
     });
 
 manageCommand
+    .command('nodes [count]')
+    .description('Change the number of nodes to execute (1, 3, or all)')
+    .action((count) => {
+        const cwd = process.cwd();
+        const nodeCounts = ['1', '3', 'all'];
+        let selectedCount;
+
+        if (!count || !nodeCounts.includes(count)) {
+            const index = readlineSync.keyInSelect(nodeCounts, chalk.yellow('Select the number of nodes to execute:'));
+            if (index !== -1) {
+                selectedCount = nodeCounts[index];
+            } else {
+                console.log('No changes were made to the node count.\n');
+                return;
+            }
+        }
+
+        try {
+            updateNodeCount(count || selectedCount, cwd);
+            console.log(chalk.green(`Node count has been set to ${count || selectedCount}.`));
+        } catch (error) {
+            console.error(chalk.red(error.message));
+        }
+    });
+
+manageCommand
     .action(() => {
         const cwd = process.cwd();
         const config = parseBlsConfig(cwd);
         console.log(`Current return type is: ${config.type}`);
         console.log(`Current environment is: ${config.environment || 'production'}`);
+        console.log(`Current node count is: ${config.deployment?.nodes === -1 ? 'all' : config.deployment?.nodes || 1}`);
 
         const answer = readlineSync.question(chalk.yellow('Would you like to change anything about the project? (yes/no): '));
         if (['yes', 'y'].includes(answer.toLowerCase())) {
@@ -89,6 +116,22 @@ manageCommand
                     console.log(chalk.green(`Deployment environment has been set to ${config.environment}.`));
                 } else {
                     console.log('No changes were made to the environment.\n');
+                }
+            }
+
+            const changeNodes = readlineSync.question(chalk.yellow('Would you like to change the number of nodes? (yes/no): '));
+            if (['yes', 'y'].includes(changeNodes.toLowerCase())) {
+                const nodeCounts = ['1', '3', 'all'];
+                const index = readlineSync.keyInSelect(nodeCounts, chalk.yellow('Select the number of nodes to execute:'));
+                if (index !== -1) {
+                    try {
+                        updateNodeCount(nodeCounts[index], cwd);
+                        console.log(chalk.green(`Node count has been set to ${nodeCounts[index]}.`));
+                    } catch (error) {
+                        console.error(chalk.red(error.message));
+                    }
+                } else {
+                    console.log('No changes were made to the node count.\n');
                 }
             }
         } else {

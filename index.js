@@ -99,7 +99,7 @@ async function main() {
             console.log(chalk.green("blessnet deploy\n"));
 
             console.log("Preview this project using the command:");
-            console.log(chalk.green("blessnet preview\n"));
+            console.log(`${chalk.green("blessnet preview\n")} or ${chalk.green("blessnet preview serve\n")}`);
 
             console.log("Change the project settings using the command:");
             console.log(chalk.green("blessnet manage\n"));
@@ -108,13 +108,13 @@ async function main() {
             console.log(chalk.green("blessnet help\n"));
 
             console.log(`\nvisit ${chalk.blue('https://docs.bless.network')} for more information.\nyou are currently ${isLoggedIn ? chalk.green('logged in') : chalk.red('logged out')} to ${chalk.yellow('bless.network')}
-            ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account login')}` : ''}`);
-            console.log('npx blessnet options account logout\n');
+            ${!isLoggedIn ? `\nTo log in, run ${chalk.blue('npx blessnet options account login')}` : ''}`);
+            console.log(`To log out,run ${chalk.blue('npx blessnet options account logout\n')}`);
             process.exit(0);
         }
     } else {
         if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand && !hasDeployTarget) {
-            const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")}\n${chalk.yellow("Initialize project? (yes/no): ")}`);
+            const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")} \n${chalk.yellow("Initialize project? (yes/no): ")} `);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
                 process.exit(1);
@@ -125,7 +125,7 @@ async function main() {
             buildCommand.parseAsync(['node', 'build']);
             process.exit(0);
         } else if (isVersionCommand) {
-            console.log(`Current version: ${packageJson.version}`);
+            console.log(`Current version: ${packageJson.version} `);
             process.exit(0);
         }
     }
@@ -138,14 +138,14 @@ async function main() {
         , stringify: false
     }, `
 ${chalk.yellow("To scaffold a new project, run:")}
-    npx blessnet init <project-name>
+    npx blessnet init < project - name >
 
-${chalk.yellow("If you already have a project set up and would \nlike to add, remove, or update its structure, run:")}
+                ${chalk.yellow("If you already have a project set up and would \nlike to add, remove, or update its structure, run:")}
     npx blessnet manage
 
 ${chalk.yellow("Preview your project results in the terminal or web:")}
     npx blessnet preview ${chalk.yellow("[serve]")}
-`);
+            `);
 
     program.addHelpText(
         'before',
@@ -157,7 +157,7 @@ ${chalk.yellow("Preview your project results in the terminal or web:")}
         `\nvisit ${chalk.blue('https://docs.bless.network')} for more information.
 you are currently ${isLoggedIn ? chalk.green('logged in') : chalk.red('logged out')} to ${chalk.yellow('bless.network')} \n
 ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account login')}\n` : ''}
-\n`,
+            \n`,
     );
 
     program
@@ -184,7 +184,7 @@ ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account logi
         .command('version')
         .description('Show the current version')
         .action(() => {
-            console.log(`Current version: ${packageJson.version}`);
+            console.log(`Current version: ${packageJson.version} `);
         });
 
     await program.parseAsync(process.argv);

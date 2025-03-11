@@ -23,7 +23,7 @@ accountCommand
 
 accountCommand
     .command('login')
-    .description('Login to your account')
+    .description('Log in to your account')
     .action(() => {
         const guid = uuidv4();
         console.log(`Please log in at: ${CONSTANTS.authHost}/?lid=${guid}&clientid=${CONSTANTS.blessAuthClientId}`);
@@ -47,7 +47,7 @@ accountCommand
 
                 const data = JSON.parse(text); // Parse the response text as JSON
                 if (data.token) {
-                    console.log('Login successful!');
+                    console.log('Log in successful!');
                     const blessnetDir = path.join(os.homedir(), '.blessnet');
                     if (!fs.existsSync(blessnetDir)) {
                         fs.mkdirSync(blessnetDir);
@@ -56,14 +56,14 @@ accountCommand
                     process.exit(0);
                 }
             } catch (error) {
-                console.error('Error checking login status:', error);
+                console.error('Error checking log in status:', error);
             }
         };
 
         const intervalId = setInterval(checkLoginStatus, 5000);
         setTimeout(() => {
             clearInterval(intervalId);
-            console.log('Login check timed out.');
+            console.log('Log in check timed out.');
         }, 180000); // 3 minutes
     });
 
