@@ -43,12 +43,20 @@ const deployCommand = new Command('deploy')
 
             // Use fixed temporary directory
             const tmpDir = path.join(originalCwd, '.bls', 'tmp-deploy');
-            fs.rmSync(tmpDir, { recursive: true, force: true }); // Clean up any existing tmp directory
-            fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
 
-            // Initialize a new project in the temp directory
-            process.chdir(path.dirname(tmpDir));
-            await initCommand.parseAsync(['node', 'init', path.basename(tmpDir)]);
+            // Check if tmp directory needs initialization
+            const needsInit = !fs.existsSync(tmpDir) ||
+                !fs.existsSync(path.join(tmpDir, 'package.json')) ||
+                !fs.existsSync(path.join(tmpDir, 'bls.toml'));
+
+            if (needsInit) {
+                fs.rmSync(tmpDir, { recursive: true, force: true }); // Clean up any existing tmp directory
+                fs.mkdirSync(path.dirname(tmpDir), { recursive: true });
+
+                // Initialize a new project in the temp directory
+                process.chdir(path.dirname(tmpDir));
+                await initCommand.parseAsync(['node', 'init', path.basename(tmpDir)]);
+            }
 
             // Copy target folder contents to public directory
             const publicDir = path.join(tmpDir, 'public');
@@ -56,7 +64,7 @@ const deployCommand = new Command('deploy')
             fs.mkdirSync(publicDir, { recursive: true });
             fs.cpSync(absoluteTargetPath, publicDir, { recursive: true });
 
-            // Update index.ts for static file serving
+            // Ensure index.ts is up to date
             const indexTsContent = `import WebServer from "@blockless/sdk-ts/dist/lib/web";
 
 const server = new WebServer();
@@ -69,6 +77,7 @@ server.start();
 
             // Use temporary directory as project path
             projectPath = tmpDir;
+
             // Change working directory to temporary project
             process.chdir(projectPath);
 
@@ -84,14 +93,26 @@ server.start();
 
         const deploySpinner = ora('Deploying project ...').start();
 
+
+        // copy bls.toml to the target folder
+        if (fs.existsSync(path.join(originalCwd, 'bls.toml'))) {
+            fs.copyFileSync(path.join(originalCwd, 'bls.toml'), path.join(projectPath, 'bls.toml'));
+        }
+
         // Load configuration from the correct path
-        const config = parseBlsConfig(projectPath);
+        const config = parseBlsConfig(projectPath, 'bls.toml');
+        const isDev = config.environment === 'development';
+
+        // copy bless-deploy.key
+        if (fs.existsSync(path.join(originalCwd, isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'))) {
+            fs.copyFileSync(path.join(originalCwd, isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'), path.join(projectPath, isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'));
+        }
 
         // Update all path operations to use projectPath instead of process.cwd()
-        const isDev = config.environment === 'development';
+
         const apiEndpoint = isDev ? 'https://dev.bls.dev' : 'https://ingress.bls.dev';
         const blessDeployKeyPath = path.join(
-            originalCwd,
+            projectPath,
             isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'
         );
 
@@ -135,7 +156,7 @@ server.start();
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
         // Load bls.toml and check last deployment
-        const blsConfigPath = path.join(originalCwd, 'bls.toml');
+        const blsConfigPath = path.join(projectPath, 'bls.toml');
         const blsConfig = toml.parse(fs.readFileSync(blsConfigPath, 'utf-8'));
         const deployments = blsConfig.deployments || [];
         const lastDeployment = deployments[deployments.length - 1];
@@ -195,7 +216,7 @@ server.start();
                 console.log(`Deployment URL: ${chalk.green(`https://${responseData.host}`)}\n`);
 
                 console.log(`${chalk.red("!!! WARNING !!!")}\n`);
-                console.log(`${chalk.red("Back up and do not share the ** " + (isDev ? "bless-deploy-dev.key" : "bless-deploy.key") + " ** file in the project root.")}`);
+                console.log(`${chalk.red(`Back up and do not share the ** ${isDev ? "bless-deploy-dev.key" : "bless-deploy.key"} ** file in the project root.`)}`);
                 console.log(`${chalk.red("This key acts as a 'password' for updating the deployment URL when")}`);
                 console.log(`${chalk.red("the project is redeployed.")}\n`);
                 // Save updater_id to appropriate key file
@@ -208,7 +229,7 @@ server.start();
                     blsConfig.production_host = responseData.host;
                 }
                 fs.writeFileSync(blsConfigPath, toml.stringify(blsConfig));
-                fs.copyFileSync(blsConfigPath, path.join(originalCwd, 'bls.toml'));
+                fs.copyFileSync(blsConfigPath, path.join(projectPath, 'bls.toml'));
             }
         } catch (error) {
             console.error('Error finalizing deployment:', error);
@@ -217,9 +238,12 @@ server.start();
 
         // Cleanup temporary directory if it was created
         if (targetFolder) {
-            // Change back to original directory before cleanup
-            process.chdir(originalCwd);
-            fs.rmSync(path.join(process.cwd(), '.bls'), { recursive: true, force: true });
+            // copy bls.toml to the target folder
+            fs.copyFileSync(blsConfigPath, path.join(originalCwd, 'bls.toml'));
+            // copy bless-deploy.key
+            if (fs.existsSync(blessDeployKeyPath)) {
+                fs.copyFileSync(blessDeployKeyPath, path.join(originalCwd, isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'));
+            }
         }
 
         process.exit(0);
