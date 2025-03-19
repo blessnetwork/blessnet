@@ -62,7 +62,7 @@ server.start();
 
 There is often a need to server static files, images, styles, client side javascript. We've also provided a quick feature that takes care of that for you, you may recognize this command from another JavaScript based framework.
 
-`server.statics("static", "public");`
+`server.statics("public", "/");`
 
 The break down of this command, is that we're going to take the `static` folder in our project path, and we'll serve files out of it when a route that has `/public` in the path, and then matches the rest of the file layout.
 
