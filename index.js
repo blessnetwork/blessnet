@@ -47,6 +47,7 @@ async function main() {
     const isDeployCommand = process.argv.includes('deploy');
     const hasDeployTarget = isDeployCommand && process.argv.length > 3;
 
+    // Handle runtime installation first
     if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && !fs.existsSync(runtimePath)) {
 
         const answer = readlineSync.question(chalk.yellow("BLESS environment not found. Do you want to install it? (yes/no): "));
@@ -67,6 +68,12 @@ async function main() {
         }
 
         await install();
+    }
+
+    // Handle init command before bls.toml check
+    if (isInitCommand) {
+        await initCommand.parseAsync(process.argv);
+        return;
     }
 
     // Skip bls.toml check if we're doing a targeted deploy
@@ -113,7 +120,7 @@ async function main() {
             process.exit(0);
         }
     } else {
-        if (!isVersionCommand && !isInitCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand && !hasDeployTarget) {
+        if (!isVersionCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand && !hasDeployTarget) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")} \n${chalk.yellow("Initialize project? (yes/no): ")} `);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
@@ -121,12 +128,7 @@ async function main() {
             }
 
             await initCommand.parseAsync(['node', 'init']);
-        } else if (isBuildCommand) {
-            buildCommand.parseAsync(['node', 'build']);
-            process.exit(0);
-        } else if (isVersionCommand) {
-            console.log(`Current version: ${packageJson.version} `);
-            process.exit(0);
+            return;
         }
     }
 
@@ -165,10 +167,8 @@ ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account logi
         .description(packageJson.description)
         .version(version);
 
-    // Register commands
-    if (fs.existsSync(blsTomlPath) || isInitCommand || isHelpCommand || isOptionsCommand) {
-        program.addCommand(initCommand);
-    }
+    // Register commands - init should always be available
+    program.addCommand(initCommand);
     program.addCommand(previewCommand);
     program.addCommand(manageCommand);
     program.addCommand(deployCommand);
