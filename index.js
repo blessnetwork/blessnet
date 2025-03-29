@@ -29,6 +29,7 @@ const buildCommand = require('./commands/build');
 const previewCommand = require('./commands/preview');
 const manageCommand = require('./commands/manage');
 const deployCommand = require('./commands/deploy');
+const registryCommand = require('./commands/registry');
 const accountCommand = require('./commands/account'); // Import the account command
 const Box = require("cli-box");
 
@@ -178,6 +179,7 @@ ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account logi
     optionsCommand.addCommand(walletCommand);
     optionsCommand.addCommand(accountCommand);
     optionsCommand.addCommand(buildCommand); // Move the build command under options
+    optionsCommand.addCommand(registryCommand);
     program.addCommand(optionsCommand);
 
     program
