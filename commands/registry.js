@@ -12,7 +12,7 @@ const {LAMPORTS_PER_SOL} =  require('@solana/web3.js')
 const readline = require('node:readline')
 const readWallet = require('./walletUtils')
 
-const blsClient = require('/Users/join/Works/bls-sol-stake/anchor/dist')
+const blsClient = require('bls-stake-cli')
 const { Keypair } = require('@solana/web3.js')
 
 const registryCommand = new Command('registry')
