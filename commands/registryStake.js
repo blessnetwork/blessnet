@@ -13,7 +13,7 @@ const readline = require('node:readline')
 const readWallet = require('./walletUtils')
 const { getProvider,base64ToArray } = require('./registryUtils')
 
-const blsClient = require('/Users/join/Works/bls-sol-stake/anchor/dist')
+const blsClient = require('bls-stake-cli')
 const { Keypair } = require('@solana/web3.js')
 
 const registryStakeCommand = new Command('stake')
