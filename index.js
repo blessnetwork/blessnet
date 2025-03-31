@@ -46,6 +46,7 @@ async function main() {
     const isPreviewCommand = process.argv.includes('preview');
     const isManageCommand = process.argv.includes('manage');
     const isDeployCommand = process.argv.includes('deploy');
+    const isRegistryCommand = process.argv.includes('registry');
     const hasDeployTarget = isDeployCommand && process.argv.length > 3;
 
     // Handle runtime installation first
@@ -121,7 +122,7 @@ async function main() {
             process.exit(0);
         }
     } else {
-        if (!isVersionCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand && !hasDeployTarget) {
+        if (!isVersionCommand && !isHelpCommand && !isOptionsCommand && !isRegistryCommand && !isBuildCommand && !hasDeployTarget) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")} \n${chalk.yellow("Initialize project? (yes/no): ")} `);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
@@ -173,13 +174,13 @@ ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account logi
     program.addCommand(previewCommand);
     program.addCommand(manageCommand);
     program.addCommand(deployCommand);
+    program.addCommand(registryCommand);
 
     // Create 'options' command and add 'wallet', 'account', and 'build' as subcommands
     const optionsCommand = new Command('options');
     optionsCommand.addCommand(walletCommand);
     optionsCommand.addCommand(accountCommand);
     optionsCommand.addCommand(buildCommand); // Move the build command under options
-    optionsCommand.addCommand(registryCommand);
     program.addCommand(optionsCommand);
 
     program

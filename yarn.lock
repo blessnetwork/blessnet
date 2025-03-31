@@ -356,10 +356,10 @@ bl@^5.0.0:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
-bls-stake-cli@^0.1.3:
-  version "0.1.3"
-  resolved "https://registry.npmjs.org/bls-stake-cli/-/bls-stake-cli-0.1.3.tgz"
-  integrity sha512-Q3ieM8RcqI2+e/ns7kA3ICvn4qLb/gDKO3cPUS4kcz8g7NyMMEZIuk0bp1tgV+7w3a1KvcB1Ozj79yys9bmXWQ==
+bls-stake-cli@^0.1.4:
+  version "0.1.4"
+  resolved "https://registry.npmjs.org/bls-stake-cli/-/bls-stake-cli-0.1.4.tgz"
+  integrity sha512-MoMtLWBLm1cvNZi9fVt23eiDyDMllFV9nwo0NwOkC1/cZ28vF3YO8sGyV8rXP0QfIR3k8iV9Tu5XYoe/MucL1g==
 
 bn.js@^5.1.2, bn.js@^5.2.0, bn.js@^5.2.1:
   version "5.2.1"
