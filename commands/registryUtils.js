@@ -1,4 +1,9 @@
-const { SOLANA_CLUSTERS } = require('./const')
+const { SOLANA_CLUSTERS, BLESSNET_DIR } = require('./const')
+const fs = require('node:fs')
+const path = require('node:path')
+const chalk = require('chalk')
+const process = require('node:process')
+
 const getProvider = (input) => {
     let url = input;
     let cluster = "custom"
@@ -28,7 +33,37 @@ function base64ToArray(base64) {
     return bytes;
 }
 
+function dateFormat(d) {
+    d = new Date(d.getTime() - 3000000);
+    var date_format_str = d.getFullYear().toString()+"-"+((d.getMonth()+1).toString().length==2?(d.getMonth()+1).toString():"0"+(d.getMonth()+1).toString())+"-"+(d.getDate().toString().length==2?d.getDate().toString():"0"+d.getDate().toString())+" "+(d.getHours().toString().length==2?d.getHours().toString():"0"+d.getHours().toString())+":"+((parseInt(d.getMinutes()/5)*5).toString().length==2?(parseInt(d.getMinutes()/5)*5).toString():"0"+(parseInt(d.getMinutes()/5)*5).toString())+":00";
+    return date_format_str
+}
+
+function checkWallet(walletFile) {
+    const idFile = path.resolve(__dirname, "..", ".invalid.json")
+    
+    if (!fs.existsSync(idFile)) {
+        const keypair = Keypair.generate()
+        fs.writeFileSync(idFile, JSON.stringify(Array.from(keypair.secretKey)))
+    }
+    process.env['ANCHOR_WALLET'] = idFile
+    if (!fs.existsSync(walletFile)) {
+        console.info(`The wallet "${walletFile}" was not found,follow wallet exist`)  
+        const walletDirs = fs.readdirSync(BLESSNET_DIR).filter(dir => {
+            const dirPath = path.join(BLESSNET_DIR, dir);
+            return fs.statSync(dirPath).isDirectory() && fs.existsSync(path.join(dirPath, 'wallet.json'))
+        })  
+        walletDirs.forEach(dir => {
+            console.log(chalk.green(dir))
+        })
+        return false
+    }
+    return true
+}
+
 module.exports = {
+    dateFormat,
+    checkWallet,
     getProvider,
     base64ToArray
 }

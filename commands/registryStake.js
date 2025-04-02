@@ -3,18 +3,16 @@ const {
     Argument 
 } = require('commander')
 const anchor = require('@coral-xyz/anchor')
-const { BLESSNET_DIR, SOLANA_CLUSTERS } = require('./const')
+const { BLESSNET_DIR } = require('./const')
 const path = require('node:path')
-const fs = require('node:fs')
 const process = require('node:process')
 const chalk = require('chalk')
 const {LAMPORTS_PER_SOL} =  require('@solana/web3.js')
 const readline = require('node:readline')
-const readWallet = require('./walletUtils')
-const { getProvider,base64ToArray } = require('./registryUtils')
+const {readWallet} = require('./walletUtils')
+const { getProvider,base64ToArray,checkWallet } = require('./registryUtils')
 
 const blsClient = require('bls-stake-cli')
-const { Keypair } = require('@solana/web3.js')
 
 const registryStakeCommand = new Command('stake')
     .option('--cluster <cluster>', 'solana cluster: mainnet, testnet, devnet, localnet, <custom>')
@@ -24,29 +22,16 @@ walletArg.required = true
 
 registryStakeCommand
     .addArgument(walletArg)
-    .action((wallet, options) => {
+    .action(async (wallet, options) => {
         options.cluster = options.cluster || 'mainnet';
         const walletDir = path.join(BLESSNET_DIR, wallet);
         const walletFile = path.join(walletDir, 'wallet.json');
-        if (!fs.existsSync(walletFile)) {
-            console.info(`The wallet "${walletFile}" was not found,follow wallet exist`)
-             const walletDirs = fs.readdirSync(BLESSNET_DIR).filter(dir => {
-                const dirPath = path.join(BLESSNET_DIR, dir);
-                return fs.statSync(dirPath).isDirectory() && fs.existsSync(path.join(dirPath, 'wallet.json'))
-            })
-            walletDirs.forEach(dir => {
-                console.log(chalk.green(dir))
-            })
-            return;
+        if (!checkWallet(walletFile)) {
+            return
         }
-        const idFile = path.resolve(__dirname, "..", ".invalid.json")
-        if (!fs.existsSync(idFile)) {
-            const keypair = Keypair.generate()
-            fs.writeFileSync(idFile, JSON.stringify(Array.from(keypair.secretKey)))
-        }
+       
         const provider = getProvider(options.cluster)
         process.env['ANCHOR_PROVIDER_URL'] = provider.endpoint
-        process.env['ANCHOR_WALLET'] = idFile
         const client = new blsClient.BlsRegisterClient()
         const rl = readline.createInterface({
             input: process.stdin,
