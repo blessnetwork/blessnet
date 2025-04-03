@@ -13,9 +13,9 @@ const { getProvider,printBalance, checkWallet } = require('./registryUtils')
 
 const blsClient = require('bls-stake-cli')
 
-const registryDeactiveCommand = new Command('deactive')
+const registryDeactiveCommand = new Command('withdraw')
     .option('--cluster <cluster>', 'solana cluster: mainnet, testnet, devnet, localnet, <custom>')
-    .description('deactive: registry deactive wallet')
+    .description('withdraw: registry withdraw vault account balance to wallet')
 const walletArg = new Argument('wallet', 'wallet name')
 walletArg.required = true
 
@@ -38,8 +38,8 @@ registryDeactiveCommand
             terminal: true
         });
 
-        const deactive = async () => {
-            const result = await client.registerClient.blsRegisterDeactive()
+        const withdraw = async () => {
+            const result = await client.registerClient.blsRegisterWithdraw()
             let endpoint = `&customUrl=${provider.endpoint}`
             if (provider.cluster !== 'custom') {
                 endpoint = ''
@@ -52,7 +52,7 @@ registryDeactiveCommand
         rl.question('Enter the encryption key: ',async (encryptionKey) => {
             if (!encryptionKey) {
                 console.log(chalk.red('An encryption key is required.'));
-                return;
+                process.exit(1)
             }
             let walletKeypair
             
@@ -63,8 +63,8 @@ registryDeactiveCommand
                 process.exit(1)
             }
             client.setWallet(new anchor.Wallet(walletKeypair))
-           
-            await deactive()
+            await printBalance(client)
+            await withdraw()
             
         })
     })

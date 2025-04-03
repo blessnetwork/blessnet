@@ -1,8 +1,13 @@
-const { SOLANA_CLUSTERS, BLESSNET_DIR } = require('./const')
+const { 
+    SOLANA_CLUSTERS, 
+    BLESSNET_DIR 
+} = require('./const')
+const anchor = require('@coral-xyz/anchor')
 const fs = require('node:fs')
 const path = require('node:path')
 const chalk = require('chalk')
 const process = require('node:process')
+const {LAMPORTS_PER_SOL} =  require('@solana/web3.js')
 
 const getProvider = (input) => {
     let url = input;
@@ -61,9 +66,25 @@ function checkWallet(walletFile) {
     return true
 }
 
+const formatSOL = (lamport) => {
+    if (typeof lamport == anchor.BN) {
+        lamport = lamport.toNumber()
+    }
+    return lamport/LAMPORTS_PER_SOL
+}
+
+const printBalance = async (client) => {
+    const pk = client.getWallet().publicKey
+    const balance = await client.getBalance(pk)
+    const sol = formatSOL(balance)
+    console.log(chalk.green(`The wallet "${pk}" balance is: ${sol}`))
+}
+
 module.exports = {
     dateFormat,
     checkWallet,
     getProvider,
-    base64ToArray
+    base64ToArray,
+    printBalance,
+    formatSOL
 }

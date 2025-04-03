@@ -10,7 +10,12 @@ const chalk = require('chalk')
 const {LAMPORTS_PER_SOL} =  require('@solana/web3.js')
 const readline = require('node:readline')
 const {readWallet} = require('./walletUtils')
-const { getProvider,base64ToArray,checkWallet } = require('./registryUtils')
+const { 
+    getProvider,
+    base64ToArray,
+    checkWallet, 
+    printBalance 
+} = require('./registryUtils')
 
 const blsClient = require('bls-stake-cli')
 
@@ -59,13 +64,14 @@ registryStakeCommand
                     endpoint = ''
                 }
                 console.log(chalk.green(`The stake transaction is: https://explorer.solana.com/transaction/${result}?cluster=${provider.cluster}${endpoint}`))
+                await printBalance(client)
             })
         }
 
         rl.question('Enter the encryption key: ',async (encryptionKey) => {
             if (!encryptionKey) {
-                console.log(chalk.red('An encryption key is required.'));
-                return;
+                console.log(chalk.red('An encryption key is required.'))
+                process.exit(1)
             }
             let walletKeypair
             
@@ -76,13 +82,14 @@ registryStakeCommand
                 process.exit(1)
             }
             client.setWallet(new anchor.Wallet(walletKeypair))
-            const balance = await client.getBalance(walletKeypair.publicKey)
-            const sol = balance / LAMPORTS_PER_SOL
-            console.log(chalk.green(`The wallet "${walletKeypair.publicKey}" balance is: ${sol}`))
-            if (sol <= 0) {
+            
+            const pk = client.getWallet().publicKey
+            const balance = await client.getBalance(pk)
+            if (balance <= 0) {
                 console.log(chalk.red('The wallet balance is 0, please fund it first.'))
                 process.exit(1)
             }
+            await printBalance(client)
             rl.question('Enter the node key: ', (nodeKey) => {
                 try {
                     nodeKeyArr = base64ToArray(nodeKey)
