@@ -17,7 +17,7 @@ const {
     formatSOL
 } = require('./registryUtils')
 
-const blsClient = require('bls-stake-cli')
+const blsClient = require('/Users/join/Works/bls-sol-stake/anchor/dist')
 
 const registryInfoCommand = new Command('info')
     .option('--cluster <cluster>', 'solana cluster: mainnet, testnet, devnet, localnet, <custom>')
@@ -33,7 +33,7 @@ registryInfoCommand
         const walletFile = path.join(walletDir, 'wallet.json')
         const walletJson = readWalletJson(walletFile)
         if (!checkWallet(walletFile)) {
-            return
+            process.exit(1)
         }
         const pubkey = walletJson.publicKey
         const provider = getProvider(options.cluster)
@@ -42,7 +42,6 @@ registryInfoCommand
         let state = null
         const pubickkey = new PublicKey(pubkey)
         try {
-
             state = await client.registerClient.fetchRegisterStateWithWallet(pubickkey)  
         } catch(e) {
             if(e.message.indexOf('Account does not exist') >= 0) {
@@ -56,11 +55,33 @@ registryInfoCommand
         let totalWithdraw = formatSOL(state?.totalWithdraw||0)
         const tab = "\t"
         console.log(chalk.green(`totalStaked: ${totalStaked}${tab}totalDeactived: ${totalDeactived}${tab}totalDeactived: ${totalWithdraw}`))
+        const groups = {}
         state?.records.forEach(e => {
-            const amount = formatSOL(e.amount)
-            const date = dateFormat(e.time)
-            console.log(`amount: ${amount}${tab}time: ${date}${tab}status: ${e.state}`)
-        });
+            const key = Buffer.from(e.nodeKey).toString('base64')
+            let grp = groups[key]
+            if(grp == null) {
+                grp = []
+                groups[key] = grp
+            }
+            grp.push(e)
+        })
+
+        for (const key in groups) {
+            console.log(chalk.red(`node :${key}`))
+            groups[key].forEach(e => {
+                const amount = formatSOL(e.amount)
+                const date = dateFormat(e.time)
+                if (e.state == "staked") {
+                    console.log(chalk.green(`${tab}amount: ${amount}${tab}time: ${date}${tab}status: ${e.state}`))
+                } else if (e.state == "withdrawed") {
+                    console.log(chalk.gray(`${tab}amount: ${amount}${tab}time: ${date}${tab}status: ${e.state}`))
+                } else {
+                    console.log(`${tab}amount: ${amount}${tab}time: ${date}${tab}status: ${e.state}`)
+                }
+            });
+        }
+        
+        
         process.exit(0)
     })
 
