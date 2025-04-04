@@ -2,13 +2,11 @@ const {
     Command, 
     Argument 
 } = require('commander')
-const anchor = require('@coral-xyz/anchor')
 const { BLESSNET_DIR } = require('./const')
 const path = require('node:path')
 const process = require('node:process')
 const {PublicKey} = require("@solana/web3.js");
 const chalk = require('chalk')
-const readline = require('node:readline')
 const {readWalletJson} = require('./walletUtils')
 const {
     getProvider, 
@@ -17,7 +15,7 @@ const {
     formatSOL
 } = require('./registryUtils')
 
-const blsClient = require('/Users/join/Works/bls-sol-stake/anchor/dist')
+const blsClient = require('bls-stake-cli')
 
 const registryInfoCommand = new Command('info')
     .option('--cluster <cluster>', 'solana cluster: mainnet, testnet, devnet, localnet, <custom>')

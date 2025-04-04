@@ -9,7 +9,11 @@ const process = require('node:process')
 const chalk = require('chalk')
 const readline = require('node:readline')
 const {readWallet} = require('./walletUtils')
-const { getProvider,printBalance, checkWallet } = require('./registryUtils')
+const { 
+    getProvider,
+    printBalance, 
+    checkWallet 
+} = require('./registryUtils')
 
 const blsClient = require('bls-stake-cli')
 
