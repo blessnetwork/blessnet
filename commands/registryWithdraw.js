@@ -9,7 +9,11 @@ const process = require('node:process')
 const chalk = require('chalk')
 const readline = require('node:readline')
 const {readWallet} = require('./walletUtils')
-const { getProvider,printBalance, checkWallet } = require('./registryUtils')
+const { 
+    getProvider,
+    printBalance, 
+    checkWallet 
+} = require('./registryUtils')
 
 const blsClient = require('bls-stake-cli')
 
@@ -39,7 +43,13 @@ registryDeactiveCommand
         });
 
         const withdraw = async () => {
-            const result = await client.registerClient.blsRegisterWithdraw()
+            let result
+            try {
+                result = await client.registerClient.blsRegisterWithdraw()
+            } catch(e) {
+                console.log(chalk.red(e.message))
+                process.exit(1)
+            }
             let endpoint = `&customUrl=${provider.endpoint}`
             if (provider.cluster !== 'custom') {
                 endpoint = ''
