@@ -65,7 +65,7 @@ registryInfoCommand
         })
 
         for (const key in groups) {
-            console.log(chalk.red(`node :${key}`))
+            console.log(chalk.red(`node: ${key}`))
             groups[key].forEach(e => {
                 const amount = formatSOL(e.amount)
                 const date = dateFormat(e.time)
