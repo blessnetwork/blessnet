@@ -11,6 +11,7 @@ const chalk = require('chalk');
 const buildCommand = require('../commands/build'); // Import buildCommand
 const initCommand = require('../commands/init'); // Import initCommand
 const manageCommand = require('../commands/manage'); // Add manage command import
+const { permission } = require('node:process');
 
 const getFetch = async () => {
     const fetch = await import('node-fetch');
@@ -139,6 +140,10 @@ server.start();
         const archivePath = path.join(projectPath, config.build_release.dir, archiveName);
         const archiveBuffer = await createWasmArchive(path.join(projectPath, config.build_release.dir), archiveName, wasmName);
 
+        // Load bls.toml
+        const blsConfigPath = path.join(projectPath, 'bls.toml');
+        const blsConfig = toml.parse(fs.readFileSync(blsConfigPath, 'utf-8'));
+
         deploySpinner.text = 'Publishing Archive Created ...'
         // Update manifest with new values
         const wasmMd5 = crypto.createHash('md5').update(fs.readFileSync(renamedWasmPath)).digest('hex');
@@ -153,11 +158,11 @@ server.start();
             url: archiveName,
             checksum: archiveChecksum
         };
+        manifest.permissions = blsConfig.permissions;
+
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
-        // Load bls.toml and check last deployment
-        const blsConfigPath = path.join(projectPath, 'bls.toml');
-        const blsConfig = toml.parse(fs.readFileSync(blsConfigPath, 'utf-8'));
+        // and check last deployment
         const deployments = blsConfig.deployments || [];
         const lastDeployment = deployments[deployments.length - 1];
 
