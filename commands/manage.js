@@ -82,6 +82,98 @@ manageCommand
     });
 
 manageCommand
+    .command('permissions [action] [url]')
+    .description('Manage allowed URLs (list, add, remove)')
+    .action((action, url) => {
+        const cwd = process.cwd();
+        const config = parseBlsConfig(cwd);
+
+        // Initialize permissions array if it doesn't exist
+        if (!config.permissions) {
+            config.permissions = [];
+        }
+
+        // Handle actions
+        switch (action) {
+            case 'list':
+                console.log(chalk.yellow('Allowed URLs:'));
+                if (config.permissions.length === 0) {
+                    console.log('No URLs configured.');
+                } else {
+                    config.permissions.forEach((url, index) => {
+                        console.log(`${index + 1}. ${url}`);
+                    });
+                }
+                break;
+
+            case 'add':
+                if (!url) {
+                    url = readlineSync.question(chalk.yellow('Enter the URL to allow (must start with https://): '));
+                }
+
+                if (!url.startsWith('https://')) {
+                    console.error(chalk.red('URL must start with https://'));
+                    return;
+                }
+
+                if (config.permissions.includes(url)) {
+                    console.log(chalk.yellow(`URL ${url} is already allowed.`));
+                    return;
+                }
+
+                config.permissions.push(url);
+                saveBlsConfig(config, cwd);
+                console.log(chalk.green(`Added ${url} to allowed URLs.`));
+                break;
+
+            case 'remove':
+                if (!url) {
+                    // If no URL is provided, show a list and ask which one to remove
+                    if (config.permissions.length === 0) {
+                        console.log(chalk.yellow('No URLs configured to remove.'));
+                        return;
+                    }
+
+                    console.log(chalk.yellow('Select URL to remove:'));
+                    const index = readlineSync.keyInSelect(
+                        config.permissions,
+                        chalk.yellow('Which URL do you want to remove?')
+                    );
+
+                    if (index === -1) {
+                        console.log('No URL was removed.');
+                        return;
+                    }
+
+                    const removedUrl = config.permissions.splice(index, 1)[0];
+                    saveBlsConfig(config, cwd);
+                    console.log(chalk.green(`Removed ${removedUrl} from allowed URLs.`));
+                } else {
+                    // Remove the specified URL
+                    const initialLength = config.permissions.length;
+                    config.permissions = config.permissions.filter(p => p !== url);
+
+                    if (config.permissions.length < initialLength) {
+                        saveBlsConfig(config, cwd);
+                        console.log(chalk.green(`Removed ${url} from allowed URLs.`));
+                    } else {
+                        console.log(chalk.yellow(`URL ${url} was not found in the allowed list.`));
+                    }
+                }
+                break;
+
+            default:
+                // If no action is provided or an invalid action, show usage
+                console.log(chalk.yellow('Usage: bls manage permissions [action] [url]'));
+                console.log('Actions:');
+                console.log('  list - Show all allowed URLs');
+                console.log('  add <url> - Add a URL to the allowed list');
+                console.log('  remove <url> - Remove a URL from the allowed list');
+                break;
+        }
+    });
+
+manageCommand
     .action(() => {
         const cwd = process.cwd();
         const config = parseBlsConfig(cwd);
@@ -132,6 +224,80 @@ manageCommand
                     }
                 } else {
                     console.log('No changes were made to the node count.\n');
+                }
+            }
+
+            const changePermissions = readlineSync.question(chalk.yellow('Would you like to manage URL permissions? (yes/no): '));
+            if (['yes', 'y'].includes(changePermissions.toLowerCase())) {
+                // Initialize permissions array if it doesn't exist
+                if (!config.permissions) {
+                    config.permissions = [];
+                }
+
+                // Show current permissions
+                console.log(chalk.yellow('\nCurrent allowed URLs:'));
+                if (config.permissions.length === 0) {
+                    console.log('No URLs configured.');
+                } else {
+                    config.permissions.forEach((url, index) => {
+                        console.log(`${index + 1}. ${url}`);
+                    });
+                }
+
+                // Ask what action to take
+                const actions = ['List URLs', 'Add a URL', 'Remove a URL'];
+                const actionIndex = readlineSync.keyInSelect(
+                    actions,
+                    chalk.yellow('What would you like to do?')
+                );
+
+                if (actionIndex === -1) {
+                    console.log('No changes were made to permissions.\n');
+                    return;
+                }
+
+                switch (actionIndex) {
+                    case 0: // List URLs - already displayed above
+                        break;
+
+                    case 1: // Add a URL
+                        const urlToAdd = readlineSync.question(chalk.yellow('Enter the URL to allow (must start with https://): '));
+
+                        if (!urlToAdd.startsWith('https://')) {
+                            console.error(chalk.red('URL must start with https://'));
+                            break;
+                        }
+
+                        if (config.permissions.includes(urlToAdd)) {
+                            console.log(chalk.yellow(`URL ${urlToAdd} is already allowed.`));
+                            break;
+                        }
+
+                        config.permissions.push(urlToAdd);
+                        saveBlsConfig(config, cwd);
+                        console.log(chalk.green(`Added ${urlToAdd} to allowed URLs.`));
+                        break;
+
+                    case 2: // Remove a URL
+                        if (config.permissions.length === 0) {
+                            console.log(chalk.yellow('No URLs configured to remove.'));
+                            break;
+                        }
+
+                        const removeIndex = readlineSync.keyInSelect(
+                            config.permissions,
+                            chalk.yellow('Which URL do you want to remove?')
+                        );
+
+                        if (removeIndex === -1) {
+                            console.log('No URL was removed.');
+                            break;
+                        }
+
+                        const removedUrl = config.permissions.splice(removeIndex, 1)[0];
+                        saveBlsConfig(config, cwd);
+                        console.log(chalk.green(`Removed ${removedUrl} from allowed URLs.`));
+                        break;
                 }
             }
         } else {
