@@ -91,6 +91,7 @@ registryStakeCommand
             }
             await printBalance(client)
             rl.question('Enter the node key: ', (nodeKey) => {
+                let nodeKeyArr
                 try {
                     nodeKeyArr = base64ToArray(nodeKey)
                 } catch {

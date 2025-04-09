@@ -52,7 +52,7 @@ registryInfoCommand
         let totalDeactived = formatSOL(state?.totalDeactived||0)
         let totalWithdraw = formatSOL(state?.totalWithdraw||0)
         const tab = "\t"
-        console.log(chalk.green(`totalStaked: ${totalStaked}${tab}totalDeactived: ${totalDeactived}${tab}totalDeactived: ${totalWithdraw}`))
+        console.log(chalk.green(`totalStaked: ${totalStaked}${tab}totalDeactived: ${totalDeactived}${tab}totalWithdraw: ${totalWithdraw}`))
         const groups = {}
         state?.records.forEach(e => {
             const key = Buffer.from(e.nodeKey).toString('base64')
