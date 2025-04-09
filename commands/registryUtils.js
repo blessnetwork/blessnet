@@ -1,7 +1,7 @@
 const { 
     SOLANA_CLUSTERS, 
     BLESSNET_DIR 
-} = require('./const')
+} = require('../lib/constants')
 const anchor = require('@coral-xyz/anchor')
 const fs = require('node:fs')
 const path = require('node:path')

@@ -1,7 +1,7 @@
 const { Command } = require('commander');
 const fs = require('node:fs');
 const path = require('node:path');
-const { BLESSNET_DIR } = require('./const');
+const { BLESSNET_DIR } = require('../lib/constants')
 
 const listWalletsCommand = new Command('list')
     .description('List all Solana wallets')

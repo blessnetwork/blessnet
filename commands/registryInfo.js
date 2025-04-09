@@ -2,7 +2,7 @@ const {
     Command, 
     Argument 
 } = require('commander')
-const { BLESSNET_DIR } = require('./const')
+const { BLESSNET_DIR } = require('../lib/constants')
 const path = require('node:path')
 const process = require('node:process')
 const {PublicKey} = require("@solana/web3.js");

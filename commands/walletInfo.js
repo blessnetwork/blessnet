@@ -2,7 +2,7 @@ const { Command } = require('commander');
 const fs = require('node:fs');
 const path = require('node:path');
 const readline = require('node:readline');
-const { BLESSNET_DIR } = require('./const');
+const { BLESSNET_DIR } = require('../lib/constants')
 const readWallet = require('./walletUtils')
 
 const walletInfoCommand = new Command('info').addArgument('name')

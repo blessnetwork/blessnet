@@ -3,7 +3,7 @@ const {
     Argument 
 } = require('commander')
 const anchor = require('@coral-xyz/anchor')
-const { BLESSNET_DIR } = require('./const')
+const { BLESSNET_DIR } = require('../lib/constants')
 const path = require('node:path')
 const process = require('node:process')
 const chalk = require('chalk')
