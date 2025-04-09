@@ -59,7 +59,6 @@ registryDeactiveCommand
                 return;
             }
             let walletKeypair
-            
             try {
                 walletKeypair = readWallet(walletFile, encryptionKey)
             } catch {
@@ -67,7 +66,6 @@ registryDeactiveCommand
                 process.exit(1)
             }
             client.setWallet(new anchor.Wallet(walletKeypair))
-           
             await deactive()
             
         })

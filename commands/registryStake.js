@@ -84,7 +84,16 @@ registryStakeCommand
             client.setWallet(new anchor.Wallet(walletKeypair))
             
             const pk = client.getWallet().publicKey
-            const balance = await client.getBalance(pk)
+
+            let balance 
+            try {
+                balance = await client.getBalance(pk)
+            } catch(e) {
+                if (e.message?.includes('failed to get balance of account')) {
+                    console.log(chalk.red(e.message))
+                    process.exit(1)
+                }
+            }
             if (balance <= 0) {
                 console.log(chalk.red('The wallet balance is 0, please fund it first.'))
                 process.exit(1)
