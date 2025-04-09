@@ -30,7 +30,7 @@ function base64ToArray(base64) {
     if (base64 === null || base64 === '') {
         return null
     }
-    const binaryString = atob(base64)
+    const binaryString = Buffer.from(base64, "base64").toString("binary")
     const bytes = new Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
         bytes[i] = binaryString.charCodeAt(i);
