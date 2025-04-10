@@ -29,11 +29,11 @@ const buildCommand = require('./commands/build');
 const previewCommand = require('./commands/preview');
 const manageCommand = require('./commands/manage');
 const deployCommand = require('./commands/deploy');
+const registryCommand = require('./commands/registry');
 const accountCommand = require('./commands/account'); // Import the account command
 const Box = require("cli-box");
 
 async function main() {
-
     const cwd = process.cwd();
     const blsTomlPath = path.join(cwd, 'bls.toml');
 
@@ -45,6 +45,7 @@ async function main() {
     const isPreviewCommand = process.argv.includes('preview');
     const isManageCommand = process.argv.includes('manage');
     const isDeployCommand = process.argv.includes('deploy');
+    const isRegistryCommand = process.argv.includes('registry');
     const hasDeployTarget = isDeployCommand && process.argv.length > 3;
 
     // Handle runtime installation first
@@ -121,7 +122,7 @@ async function main() {
             process.exit(0);
         }
     } else {
-        if (!isVersionCommand && !isHelpCommand && !isOptionsCommand && !isBuildCommand && !hasDeployTarget) {
+        if (!isVersionCommand && !isHelpCommand && !isOptionsCommand && !isRegistryCommand && !isBuildCommand && !hasDeployTarget) {
             const answer = readlineSync.question(`Run ${chalk.blue("blessnet help")} for more information.\n\n${chalk.red("No bls.toml file detected in the current directory.")} \n${chalk.yellow("Initialize project? (yes/no): ")} `);
 
             if (answer.toLowerCase() !== 'yes' && answer.toLowerCase() !== 'y') {
@@ -173,6 +174,7 @@ ${!isLoggedIn ? `\nTo login, run ${chalk.blue('npx blessnet options account logi
     program.addCommand(previewCommand);
     program.addCommand(manageCommand);
     program.addCommand(deployCommand);
+    program.addCommand(registryCommand);
 
     // Create 'options' command and add 'wallet', 'account', and 'build' as subcommands
     const optionsCommand = new Command('options');

@@ -1,13 +1,11 @@
 const { Command } = require('commander');
 const { Keypair } = require('@solana/web3.js');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const readline = require('node:readline');
 const chalk = require('chalk');
-
-const BLESSNET_DIR = path.join(os.homedir(), '.blessnet');
+const { BLESSNET_DIR } = require('../lib/constants');
 
 if (!fs.existsSync(BLESSNET_DIR)) {
     fs.mkdirSync(BLESSNET_DIR);

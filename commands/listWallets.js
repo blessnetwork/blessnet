@@ -1,9 +1,7 @@
 const { Command } = require('commander');
 const fs = require('node:fs');
-const os = require('node:os');
 const path = require('node:path');
-
-const BLESSNET_DIR = path.join(os.homedir(), '.blessnet');
+const { BLESSNET_DIR } = require('../lib/constants')
 
 const listWalletsCommand = new Command('list')
     .description('List all Solana wallets')
@@ -22,7 +20,7 @@ const listWalletsCommand = new Command('list')
                     const walletData = JSON.parse(fs.readFileSync(walletFilePath, 'utf8'));
                     console.log(`  ${dir}: ${walletData.publicKey}`);
                 } else {
-                    console.log(`  ${dir}: Wallet.json file not found`);
+                    console.log(`  ${dir}: wallet.json file not found`);
                 }
             });
         }
