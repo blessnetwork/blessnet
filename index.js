@@ -72,7 +72,8 @@ async function main() {
 
     // Handle init command before bls.toml check
     if (isInitCommand) {
-        await initCommand.parseAsync(process.argv);
+        const argv = process.argv;
+        await initCommand.parseAsync(["node", "init"].concat(argv.slice(-1)));
         return;
     }
 

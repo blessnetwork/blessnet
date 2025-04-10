@@ -192,7 +192,8 @@ server.start();
             const postData = {
                 destination: result.cid,
                 entry_method: wasmName,
-                return_type: config.type // Assuming return_type is in the config file
+                return_type: config.type, // Assuming return_type is in the config file
+                permissions: blsConfig.permissions,
             };
 
             if (hasBlessDeployKey) {

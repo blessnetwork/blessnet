@@ -21,34 +21,41 @@ const getOra = async () => {
 };
 
 const initCommand = new Command('init')
-    .argument('[name]', 'name of the project',)
+    .argument('[name]', 'name of the project')
     .description('Initialize a new project')
-    .action(async (name) => {
+    .action(async (projectNameArg) => {
         checkGitInstalled(); // Check if git is installed
 
-        const projectName = name || readlineSync.question('Enter a name for the project: ');
+        let projectName = projectNameArg;
+        // If the argument equals "init" or is empty, prompt the user.
+        if (!projectName || projectName === 'init' || projectName.trim() === '') {
+            projectName = readlineSync.question('Enter a name for the project: ');
+            while (!projectName || projectName.trim() === '') {
+                console.log(chalk.yellow('Project name cannot be empty.'));
+                projectName = readlineSync.question('Enter a name for the project: ');
+            }
+        }
+
         const installationPath = path.join(process.cwd(), projectName);
-        const sanitizedName = slugify(projectName)
+        const sanitizedName = slugify(projectName);
         const functionId = `bless-function_${sanitizedName}-1.0.0`;
         const ora = await getOra();
 
         console.log("");
-        const initSpinner = ora(`${chalk.green("initializing")} a new project at ${installationPath}...`).start()
+        const initSpinner = ora(`${chalk.green("initializing")} a new project at ${installationPath}...`).start();
         try {
             await downloadRepository({
                 repoUrl: "https://github.com/blessnetwork/template-javy-typescript-hello-world.git",
                 destination: installationPath
             });
 
+            initSpinner.text = "initializing dependencies...";
 
-            initSpinner.text = "initializing dependencies..."
+            execSync(`cd ${installationPath} && npm pkg set name=${sanitizedName}`);
+            execSync(`cd ${installationPath} && npm pkg set bls.functionId=${functionId}`);
+            execSync(`cd ${installationPath} && npm install`, { stdio: 'ignore' });
 
-            execSync(`cd ${installationPath} && npm pkg set name=${sanitizedName}`)
-            execSync(`cd ${installationPath} && npm pkg set bls.functionId=${functionId}`)
-            execSync(`cd ${installationPath} && npm install`, { stdio: 'ignore' })
-
-
-            initSpinner.succeed('Project initialized successfully.')
+            initSpinner.succeed('Project initialized successfully.');
             console.log('');
             console.log(`Run 'cd ${projectName}' and 'blessnet' to get started.`);
             console.log('');
