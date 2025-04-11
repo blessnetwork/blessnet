@@ -88,19 +88,22 @@ manageCommand
         const cwd = process.cwd();
         const config = parseBlsConfig(cwd);
 
-        // Initialize permissions array if it doesn't exist
-        if (!config.permissions) {
-            config.permissions = [];
+        // Initialize deployment and permissions array if they don't exist
+        if (!config.deployment) {
+            config.deployment = {};
+        }
+        if (!config.deployment.permissions) {
+            config.deployment.permissions = [];
         }
 
         // Handle actions
         switch (action) {
             case 'list':
                 console.log(chalk.yellow('Allowed URLs:'));
-                if (config.permissions.length === 0) {
+                if (config.deployment.permissions.length === 0) {
                     console.log('No URLs configured.');
                 } else {
-                    config.permissions.forEach((url, index) => {
+                    config.deployment.permissions.forEach((url, index) => {
                         console.log(`${index + 1}. ${url}`);
                     });
                 }
@@ -116,12 +119,12 @@ manageCommand
                     return;
                 }
 
-                if (config.permissions.includes(url)) {
+                if (config.deployment.permissions.includes(url)) {
                     console.log(chalk.yellow(`URL ${url} is already allowed.`));
                     return;
                 }
 
-                config.permissions.push(url);
+                config.deployment.permissions.push(url);
                 saveBlsConfig(config, cwd);
                 console.log(chalk.green(`Added ${url} to allowed URLs.`));
                 break;
@@ -129,14 +132,14 @@ manageCommand
             case 'remove':
                 if (!url) {
                     // If no URL is provided, show a list and ask which one to remove
-                    if (config.permissions.length === 0) {
+                    if (config.deployment.permissions.length === 0) {
                         console.log(chalk.yellow('No URLs configured to remove.'));
                         return;
                     }
 
                     console.log(chalk.yellow('Select URL to remove:'));
                     const index = readlineSync.keyInSelect(
-                        config.permissions,
+                        config.deployment.permissions,
                         chalk.yellow('Which URL do you want to remove?')
                     );
 
@@ -145,15 +148,15 @@ manageCommand
                         return;
                     }
 
-                    const removedUrl = config.permissions.splice(index, 1)[0];
+                    const removedUrl = config.deployment.permissions.splice(index, 1)[0];
                     saveBlsConfig(config, cwd);
                     console.log(chalk.green(`Removed ${removedUrl} from allowed URLs.`));
                 } else {
                     // Remove the specified URL
-                    const initialLength = config.permissions.length;
-                    config.permissions = config.permissions.filter(p => p !== url);
+                    const initialLength = config.deployment.permissions.length;
+                    config.deployment.permissions = config.deployment.permissions.filter(p => p !== url);
 
-                    if (config.permissions.length < initialLength) {
+                    if (config.deployment.permissions.length < initialLength) {
                         saveBlsConfig(config, cwd);
                         console.log(chalk.green(`Removed ${url} from allowed URLs.`));
                     } else {
@@ -229,17 +232,20 @@ manageCommand
 
             const changePermissions = readlineSync.question(chalk.yellow('Would you like to manage URL permissions? (yes/no): '));
             if (['yes', 'y'].includes(changePermissions.toLowerCase())) {
-                // Initialize permissions array if it doesn't exist
-                if (!config.permissions) {
-                    config.permissions = [];
+                // Initialize deployment and permissions array if they don't exist
+                if (!config.deployment) {
+                    config.deployment = {};
+                }
+                if (!config.deployment.permissions) {
+                    config.deployment.permissions = [];
                 }
 
                 // Show current permissions
                 console.log(chalk.yellow('\nCurrent allowed URLs:'));
-                if (config.permissions.length === 0) {
+                if (config.deployment.permissions.length === 0) {
                     console.log('No URLs configured.');
                 } else {
-                    config.permissions.forEach((url, index) => {
+                    config.deployment.permissions.forEach((url, index) => {
                         console.log(`${index + 1}. ${url}`);
                     });
                 }
@@ -268,24 +274,24 @@ manageCommand
                             break;
                         }
 
-                        if (config.permissions.includes(urlToAdd)) {
+                        if (config.deployment.permissions.includes(urlToAdd)) {
                             console.log(chalk.yellow(`URL ${urlToAdd} is already allowed.`));
                             break;
                         }
 
-                        config.permissions.push(urlToAdd);
+                        config.deployment.permissions.push(urlToAdd);
                         saveBlsConfig(config, cwd);
                         console.log(chalk.green(`Added ${urlToAdd} to allowed URLs.`));
                         break;
 
                     case 2: // Remove a URL
-                        if (config.permissions.length === 0) {
+                        if (config.deployment.permissions.length === 0) {
                             console.log(chalk.yellow('No URLs configured to remove.'));
                             break;
                         }
 
                         const removeIndex = readlineSync.keyInSelect(
-                            config.permissions,
+                            config.deployment.permissions,
                             chalk.yellow('Which URL do you want to remove?')
                         );
 
@@ -294,7 +300,7 @@ manageCommand
                             break;
                         }
 
-                        const removedUrl = config.permissions.splice(removeIndex, 1)[0];
+                        const removedUrl = config.deployment.permissions.splice(removeIndex, 1)[0];
                         saveBlsConfig(config, cwd);
                         console.log(chalk.green(`Removed ${removedUrl} from allowed URLs.`));
                         break;

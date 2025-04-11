@@ -158,7 +158,7 @@ server.start();
             url: archiveName,
             checksum: archiveChecksum
         };
-        manifest.permissions = blsConfig.permissions;
+        manifest.permissions = blsConfig.deployment?.permissions || [];
 
         fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
 
@@ -193,7 +193,7 @@ server.start();
                 destination: result.cid,
                 entry_method: wasmName,
                 return_type: config.type, // Assuming return_type is in the config file
-                permissions: blsConfig.permissions,
+                permissions: blsConfig.deployment?.permissions || [],
             };
 
             if (hasBlessDeployKey) {
