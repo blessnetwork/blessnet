@@ -41,7 +41,7 @@ You can now use the `blessnet` command.
 | `preview`     | Preview your project                    | `serve`                              |
 | `manage`      | Manage your project                     | `type [newType]`                     |
 | `account`     | Manage your account                     | `login`, `logout`                    |
-| `registry`    | Registry work node with you wallt       | `stake`, `deactive`,`withdraw`,`info`|
+| `registry`    | Register a worker node with your wallet | `stake`, `deactive`,`withdraw`,`info`|
 
 ## details
 
