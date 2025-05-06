@@ -6,7 +6,13 @@ Build distributed, scalable, edge based applications fast.
 
 Make sure you have `npm` installed. We recommend a `version 18+` the fastest way to getting started with npm is installing it into your system using `nvm`.
 
-* <https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating>
+* <https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating> or
+* curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+* If you use bash source ~/.bashrc or if you use macOS source ~/.zshrc
+* nvm install 20.11.1 && nvm use 20.11.1
+
+
+
 
 Where ever you are, run `npx blessnet` to get context feedback. If calling from inside a project folder, information about the state of the project will be returned.
 
