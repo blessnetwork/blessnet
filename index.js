@@ -13,6 +13,7 @@ const { getRuntime } = require('./lib/bins');
 const chalk = require('chalk');
 const readlineSync = require('readline-sync')
 const { parseTomlConfig } = require('./lib/config'); // Import parseTomlConfig
+const { getHeadTriggerData } = require('./lib/headNode');
 
 // checks
 const isLinked = require('node:fs').existsSync(require('node:path').join(__dirname, 'node_modules', '.bin'));
@@ -44,6 +45,7 @@ async function main() {
     const isHelpCommand = process.argv.includes('help') || process.argv.includes('-h') || process.argv.includes('--help');
     const isPreviewCommand = process.argv.includes('preview');
     const isManageCommand = process.argv.includes('manage');
+    const isTriggersCommand = process.argv.includes('triggers');
     const isDeployCommand = process.argv.includes('deploy');
     const isRegistryCommand = process.argv.includes('registry');
     const hasDeployTarget = isDeployCommand && process.argv.length > 3;
@@ -80,13 +82,13 @@ async function main() {
 
     // Skip bls.toml check if we're doing a targeted deploy
     if (!isVersionCommand && !isOptionsCommand && !isBuildCommand && fs.existsSync(blsTomlPath) && !hasDeployTarget) {
-        if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand) {
+        if (!isHelpCommand && !isPreviewCommand && !isManageCommand && !isDeployCommand && !isTriggersCommand) {
             const blsToml = parseTomlConfig(cwd, 'bls.toml'); // Use parseTomlConfig
 
             const info = [{
                 "Project Name": blsToml.name,
                 "Version": blsToml.version,
-                "Type": blsToml.type,
+                "Type": blsToml.type
             }];
 
             console.table(info);
@@ -103,6 +105,39 @@ async function main() {
             } else {
                 console.log(chalk.yellow("Deployment Status: Not Deployed\n"));
             }
+
+            if (blsToml.deployments && blsToml.deployments[0] && blsToml.triggers) {
+                console.log(chalk.yellow(`Triggers:`));
+
+                if (blsToml.triggers.length > 0) {
+                    const headTriggerData = await getHeadTriggerData(blsToml.deployments[0].cid);
+                    const jobs = headTriggerData.jobs;
+
+                    blsToml.triggers.forEach((trigger, index) => {
+                        const foundTrigger = jobs.find(job => job.description === trigger.name && job.schedule === trigger.schedule);
+                        const lastRun = foundTrigger && foundTrigger.last_run && new Date(foundTrigger.last_run).getTime() > 0 ? new Date(foundTrigger.last_run).getTime() : null;
+                        
+                        // Add separator between triggers except for the first one
+                        if (index > 0) console.log(chalk.gray('  ----------------------------------------'));
+                        
+                        console.log(chalk.yellow(`  • Name: ${chalk.white(trigger.name)} [${trigger.type}]`));
+                        if (trigger.schedule) {
+                            console.log(chalk.yellow(`    Schedule: ${chalk.white(trigger.schedule)}`));
+                        }
+                        if (foundTrigger) {
+                            console.log(chalk.yellow(`    Status: ${chalk.green('Deployed')}`));
+                        } else {
+                            console.log(chalk.yellow(`    Status: ${chalk.gray('Not Deployed')}`));
+                        }
+                        console.log(chalk.yellow(`    Last Run: ${lastRun ? chalk.white(new Date(lastRun).toLocaleString()) : chalk.gray('Never')}`));
+                        console.log();
+                    });
+                }
+            } else {
+                console.log(chalk.yellow(`Triggers: ${chalk.red("Disabled")}`));
+            }
+
+            console.log('\n')
 
             console.log("Deploy this project to the BLESS network using the command:");
             console.log(chalk.green("blessnet deploy\n"));

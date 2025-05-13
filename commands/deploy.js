@@ -12,6 +12,7 @@ const buildCommand = require('../commands/build'); // Import buildCommand
 const initCommand = require('../commands/init'); // Import initCommand
 const manageCommand = require('../commands/manage'); // Add manage command import
 const { permission } = require('node:process');
+const { deployTrigger } = require('../lib/headNode');
 
 const getFetch = async () => {
     const fetch = await import('node-fetch');
@@ -112,6 +113,7 @@ server.start();
         // Update all path operations to use projectPath instead of process.cwd()
 
         const apiEndpoint = isDev ? 'https://dev.bls.dev' : 'https://ingress.bls.dev';
+        const headApiEndpoint = isDev ? 'http://localhost:8080' : 'http://localhost:8080';
         const blessDeployKeyPath = path.join(
             projectPath,
             isDev ? 'bless-deploy-dev.key' : 'bless-deploy.key'
@@ -176,6 +178,13 @@ server.start();
         const manifestBuffer = fs.readFileSync(manifestPath);
         const result = await submitWasmArchive(archiveBuffer, archiveName, manifestBuffer);
         deploySpinner.text = 'Saving Deployment Results ...'
+
+        // Deploy the triggers
+        const triggers = blsConfig.triggers || [];
+        deploySpinner.text = 'Deploying Triggers ...'
+        for (const trigger of triggers) {
+            await deployTrigger(result.cid, lastDeployment.cid, trigger);
+        }
 
         // Update bls.toml with deployment results
         blsConfig.deployments = [result];
