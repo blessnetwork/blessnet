@@ -1,6 +1,6 @@
 # Web Sites
 
-Taking advantage of the IPFS and BLESS Network at the Edge, we can serve fast web sites, apis, and static files to users all around the world. 
+Taking advantage of the IPFS and BLESS Network at the Edge, we can serve fast websites, APIs, and static files to users all around the world. 
 
 We can do it easily and quickly using the BLESSNET CLI. In this tutorial we will dive into creating websites on BLESS Net, modifying routes, serving files, and creating a simple API.
 
@@ -60,7 +60,7 @@ server.start();
 
 ### Serving Static Files
 
-There is often a need to server static files, images, styles, client side javascript. We've also provided a quick feature that takes care of that for you, you may recognize this command from another JavaScript based framework.
+There is often a need to serve static files, images, styles, client side javascript. We've also provided a quick feature that takes care of that for you, you may recognize this command from another JavaScript based framework.
 
 `server.statics("public", "/");`
 
