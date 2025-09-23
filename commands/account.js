@@ -11,19 +11,15 @@ accountCommand
     .action(async () => {
         const isLoggedIn = auth.isLoggedIn();
         if (isLoggedIn) {
-            // Check if current JWT is valid
+            // Check if authentication is valid (includes auto-refresh)
             const validJWT = await auth.getValidJWT();
             if (validJWT) {
                 console.log(`You are ${chalk.green('logged in.')}`);
             } else {
-                console.log(
-                    `You are ${chalk.yellow(
-                        'logged in but token needs refresh.'
-                    )} Please log in again.`
-                );
+                console.log(`You are ${chalk.red('logged out.')} Run: ${chalk.blue('blessnet options account login')}`);
             }
         } else {
-            console.log(`You are ${chalk.red('logged out.')}`);
+            console.log(`You are ${chalk.red('logged out.')} Run: ${chalk.blue('blessnet options account login')}`);
         }
     });
 
