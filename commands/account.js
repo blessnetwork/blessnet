@@ -37,7 +37,7 @@ accountCommand
         const checkLoginStatus = async () => {
             try {
                 const response = await fetch(
-                    `${CONSTANTS.authHost}/api/verify-activity`,
+                    `${CONSTANTS.authHost}/api/v1/auth/verify-activity`,
                     {
                         method: 'POST',
                         headers: {
@@ -48,7 +48,7 @@ accountCommand
                             clientid: CONSTANTS.blessAuthClientId
                         })
                     }
-        );
+                );
                 const text = await response.text();
                 if (text.length === 0) {
                     return;
