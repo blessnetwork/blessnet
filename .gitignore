@@ -2,3 +2,4 @@ node_modules/
 foo/
 *.log
 .invalid.json
+.vscode
