@@ -28,7 +28,7 @@ accountCommand
     .description('Log in to your account')
     .action(() => {
         const guid = uuidv4();
-        console.log(`Please log in at: ${CONSTANTS.authHost}/?lid=${guid}&clientid=${CONSTANTS.blessAuthClientId}`);
+        console.log(`Please log in at: ${CONSTANTS.authHost}/?lid=${guid}&clientId=${CONSTANTS.blessAuthClientId}`);
 
         const checkLoginStatus = async () => {
             try {
@@ -41,7 +41,7 @@ accountCommand
                         },
                         body: JSON.stringify({
                             lid: guid,
-                            clientid: CONSTANTS.blessAuthClientId
+                            clientId: CONSTANTS.blessAuthClientId
                         })
                     }
                 );
@@ -50,10 +50,9 @@ accountCommand
                     return;
                 }
 
-                const data = JSON.parse(text); // Parse the response text as JSON
-                if (data.jwt && data.refreshToken) {
-                    console.log('Verifying JWT...');
+                const data = JSON.parse(text);
 
+                if (data.jwt && data.refreshToken) {
                     // Verify JWT before storing
                     const isValid = await auth.verifyJWT(data.jwt);
                     if (!isValid) {
@@ -64,6 +63,8 @@ accountCommand
                     console.log('Log in successful!');
                     auth.setAuth(data.jwt, data.refreshToken);
                     process.exit(0);
+                } else {
+                    console.log('Response missing jwt or refreshToken');
                 }
             } catch (error) {
                 console.error('Error checking log in status:', error);
