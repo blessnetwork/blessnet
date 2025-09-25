@@ -12,4 +12,3 @@ describe('run', () => {
         assert.strictEqual(result.trim(), 'hello world!');
     });
 });
-

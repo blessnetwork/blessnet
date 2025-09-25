@@ -1,23 +1,25 @@
 const { Command } = require('commander');
 const { v4: uuidv4 } = require('uuid');
 const CONSTANTS = require('../lib/constants');
-const fs = require('node:fs');
-const path = require('node:path');
-const os = require('node:os');
+const auth = require('../lib/auth');
 const chalk = require('chalk');
 
 const accountCommand = new Command('account');
 
 accountCommand
     .description('Manage your account')
-    .action(() => {
-        const blessnetDir = path.join(os.homedir(), '.blessnet');
-        const tokenPath = path.join(blessnetDir, 'auth_token');
-        const isLoggedIn = fs.existsSync(tokenPath); // Check if auth_token file exists
+    .action(async () => {
+        const isLoggedIn = auth.isLoggedIn();
         if (isLoggedIn) {
-            console.log(`You are ${chalk.green('logged in.')}`);
+            // Check if authentication is valid (includes auto-refresh)
+            const validJWT = await auth.getValidJWT();
+            if (validJWT) {
+                console.log(`You are ${chalk.green('logged in.')}`);
+            } else {
+                console.log(`You are ${chalk.red('logged out.')} Run: ${chalk.blue('blessnet options account login')}`);
+            }
         } else {
-            console.log(`You are ${chalk.red('logged out.')}`);
+            console.log(`You are ${chalk.red('logged out.')} Run: ${chalk.blue('blessnet options account login')}`);
         }
     });
 
@@ -26,34 +28,43 @@ accountCommand
     .description('Log in to your account')
     .action(() => {
         const guid = uuidv4();
-        console.log(`Please log in at: ${CONSTANTS.authHost}/?lid=${guid}&clientid=${CONSTANTS.blessAuthClientId}`);
+        console.log(`Please log in at: ${CONSTANTS.authHost}/?lid=${guid}&clientId=${CONSTANTS.blessAuthClientId}`);
 
         const checkLoginStatus = async () => {
             try {
-                const response = await fetch(`${CONSTANTS.authHost}/api/verify-activity`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        lid: guid,
-                        clientid: CONSTANTS.blessAuthClientId
-                    })
-                });
+                const response = await fetch(
+                    `${CONSTANTS.authHost}/api/v1/auth/verify-activity`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            lid: guid,
+                            clientId: CONSTANTS.blessAuthClientId
+                        })
+                    }
+                );
                 const text = await response.text();
                 if (text.length === 0) {
                     return;
                 }
 
-                const data = JSON.parse(text); // Parse the response text as JSON
-                if (data.token) {
-                    console.log('Log in successful!');
-                    const blessnetDir = path.join(os.homedir(), '.blessnet');
-                    if (!fs.existsSync(blessnetDir)) {
-                        fs.mkdirSync(blessnetDir);
+                const data = JSON.parse(text);
+
+                if (data.jwt && data.refreshToken) {
+                    // Verify JWT before storing
+                    const isValid = await auth.verifyJWT(data.jwt);
+                    if (!isValid) {
+                        console.error('JWT verification failed. Please try again.');
+                        return;
                     }
-                    fs.writeFileSync(path.join(blessnetDir, 'auth_token'), data.token);
+
+                    console.log('Log in successful!');
+                    auth.setAuth(data.jwt, data.refreshToken);
                     process.exit(0);
+                } else {
+                    console.log('Response missing jwt or refreshToken');
                 }
             } catch (error) {
                 console.error('Error checking log in status:', error);
@@ -71,13 +82,11 @@ accountCommand
     .command('logout')
     .description('Logout from your account')
     .action(() => {
-        const blessnetDir = path.join(os.homedir(), '.blessnet');
-        const tokenPath = path.join(blessnetDir, 'auth_token');
-        if (fs.existsSync(tokenPath)) {
-            fs.unlinkSync(tokenPath);
-            console.log('Logout successful. Token destroyed.');
+        const success = auth.clearAuth();
+        if (success) {
+            console.log('Logout successful. Tokens cleared.');
         } else {
-            console.log('No token found. You are not logged in.');
+            console.log('Error during logout.');
         }
     });
 
